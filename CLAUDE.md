@@ -20,3 +20,14 @@ Uživatel dělá marketing pro ZOFI (zateplování fasád, Olomouc). Komunikace 
 - **Fasádní akademie:** náhled přes `.claude/launch.json` (akademie) nebo dvojklik na `index.html`.
 
 Neměnit schválený styl bez souhlasu. Nepublikovat nic za ZOFI bez rozhodnutí uživatele. Technické údaje ve videích a textech označit k ověření technikem.
+
+## Platforma Fasádní akademie (tento repozitář)
+
+Vlastní placená platforma na videokurzy ZOFI, náhrada za Herohero, Patreon a členství na YouTube (bez jejich poplatků a s plnou kontrolou). Videa s hodnotou, která nechceme dávat na YouTube zdarma, jsou rozdělená do kurzů za paywallem.
+
+- **Dvě části:** prodejní web (musí zákazníkovi aplikaci prodat) a aplikace. Tlačítko přihlášení vede z webu rovnou do aplikace.
+- **Vzhled:** Apple styl, čistá a praktická aplikace. Barvy a typografie z `prototyp/shared/base.css`.
+- **Stav:** zatím jen prototyp, nic nemá fungovat doopravdy (přihlášení, platby, videa).
+- **Technika:** Vite + React + TypeScript, animace GSAP (`gsap`, `@gsap/react`), plynulý scroll Lenis (`src/lib/smooth-scroll.ts`). React Bits není balíček: komponenty se kopírují jednotlivě (`npx shadcn@latest add @react-bits/<Název>-<JS|TS>-<CSS|TW>`), licence MIT + Commons Clause.
+- **`prototyp/`:** původní statický prototyp (`index.html`, `app.html`, `shared/`). Slouží jen jako reference, nestavíme na něm.
+- **Příkazy:** `npm run dev` (vývoj), `npm run build`, `npm run lint`.
