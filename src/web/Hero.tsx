@@ -1,16 +1,15 @@
-import { Suspense, lazy, useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react'
+import { Suspense, lazy, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Link } from 'react-router'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useGSAP } from '@gsap/react'
-import { ArrowDown, Bookmark, Check, GraduationCap, Heart, Lock, Play, PlaySquare, Search } from 'lucide-react'
+import { ArrowDown, Bookmark, Check, GraduationCap, House, Library as LibraryIcon, Lock, Play, PlaySquare, Search } from 'lucide-react'
 import { BorderBeam } from '@/components/magicui/border-beam'
 import { ShimmerButton } from '@/components/magicui/shimmer-button'
 import SplitText from '../components/reactbits/SplitText'
 import { Logo } from '../components/Logo'
 import { Thumb } from '../components/Thumb'
-import { COURSES, FEED_COUNT, PLANS, courseLessons, feed, fmtAgo, fmtTime, lessonInfo, videoHref } from '../data/catalog'
-import { TOPICS } from '../data/feed'
+import { COURSES, PLANS, courseLessons, feed, fmtAgo, fmtTime, lessonInfo, videoHref, vid } from '../data/catalog'
 import { cz } from '../lib/czech'
 import { goTo } from '../lib/smooth-scroll'
 import talirDrevostavba from '../assets/renders/talir-drevostavba-800.webp'
@@ -258,7 +257,7 @@ export function Hero() {
   )
 }
 
-/** Statický náhled aplikace (sekce Videa) v okně prohlížeče, zmenšený na šířku stránky. */
+/** Statický náhled aplikace (obrazovka Domů) v okně prohlížeče, zmenšený na šířku stránky. */
 function AppPreview() {
   const outer = useRef<HTMLDivElement>(null)
   const [width, setWidth] = useState(1200)
@@ -277,97 +276,96 @@ function AppPreview() {
     return () => cancelAnimationFrame(r)
   }, [width])
 
-  // Na úzkém displeji bez postranního panelu, aby byl náhled čitelný.
+  // Na úzkém displeji bez levého pruhu, aby byl náhled čitelný.
   const compact = width < 640
   const design = compact ? 560 : 1240
   const scale = width / design
   const items = feed()
-  const [top, ...rest] = items
-  const rings = [30, 20, 0]
+  const top = items[0]
+  const lesson = vid(RESUME)!
+  const zat = COURSES[0]
+  const rows = [
+    { t: 'Pokračovat ve sledování', list: [{ x: lesson, sub: `${zat.short} · lekce 4 z ${courseLessons(zat).length}`, pct: 30 }] },
+    { t: 'Nová videa', list: items.slice(1, 8).map((f) => ({ x: f.video, sub: `${f.topic} · ${fmtAgo(f.date)}`, pct: 0 })) },
+  ]
 
   return (
     <div ref={outer} className="preview" style={{ height: (compact ? 560 : 760) * scale }} aria-hidden inert>
-      <div
-        className={`preview-inner${compact ? ' compact' : ''}`}
-        style={{ width: design, transform: `scale(${scale})` }}
-      >
-        <aside className="pv-side">
-          <div className="pv-logo">
+      <div className={`preview-inner${compact ? ' compact' : ''}`} style={{ width: design, transform: `scale(${scale})` }}>
+        <div className="pv-top">
+          <span className="pv-logo">
             <Logo />
             <span>Akademie</span>
-          </div>
-          <div className="pv-item on">
-            <PlaySquare /> Videa <em>{FEED_COUNT}</em>
-          </div>
-          <div className="pv-item">
-            <GraduationCap /> Kurzy <em>{COURSES.length}</em>
-          </div>
-          <div className="pv-item">
-            <Bookmark /> Uložené <em>2</em>
-          </div>
-          <div className="pv-label">Moje kurzy</div>
-          {COURSES.map((c, i) => (
-            <div className="pv-item pv-course" key={c.id}>
-              <span className="pv-ring" style={{ '--p': rings[i] } as CSSProperties} />
-              {c.short}
-            </div>
-          ))}
-          <div className="pv-user">
-            <span className="pv-avatar">JN</span>
-            <span>
-              <b>Jan Novák</b>
-              <small>Roční předplatné</small>
-            </span>
-          </div>
-        </aside>
-        <div className="pv-main">
-          <div className="pv-top">
-            <span className="pv-search">
-              <Search /> Hledat videa a lekce <kbd>⌘K</kbd>
-            </span>
-          </div>
-          <div className="pv-page">
-            <div className="pv-title">
-              Videa <span>{FEED_COUNT}</span>
-            </div>
-            <p className="pv-desc">Novinky, materiály a ukázky ze staveb ZOFI. Nové video každý týden.</p>
-            <div className="pv-tabs">
-              <span className="on">Vše</span>
-              {TOPICS.map((t) => (
-                <span key={t}>
-                  {t} <em>{items.filter((f) => f.topic === t).length}</em>
+          </span>
+          <span className="pv-search">
+            <Search /> Hledat videa a lekce <kbd>⌘K</kbd>
+          </span>
+          <span className="pv-avatar">JN</span>
+        </div>
+        <div className="pv-body">
+          <aside className="pv-rail">
+            {[
+              { i: House, t: 'Domů', on: true },
+              { i: PlaySquare, t: 'Videa' },
+              { i: GraduationCap, t: 'Kurzy' },
+              { i: LibraryIcon, t: 'Knihovna' },
+            ].map(({ i: Icon, t, on }) => (
+              <span key={t} className={on ? 'on' : ''}>
+                <i>
+                  <Icon />
+                </i>
+                {t}
+              </span>
+            ))}
+          </aside>
+          <div className="pv-main">
+            <div className="pv-feat">
+              <img src={talirDrevostavba} alt="" />
+              <div className="pv-feat-in">
+                <small>Nové video</small>
+                <b>{top.video.t}</b>
+                <p>
+                  {top.topic} · {fmtAgo(top.date)} · {top.video.d}
+                </p>
+                <span className="pv-btns">
+                  <span className="pv-play">
+                    <Play fill="currentColor" strokeWidth={0} /> Přehrát
+                  </span>
+                  <span className="pv-save">
+                    <Bookmark /> Uložit
+                  </span>
                 </span>
-              ))}
-              <span className="pv-sort">
-                Řadit <b>Nejnovější</b>
+              </div>
+              <span className="pv-dots">
+                <i className="on" />
+                <i />
+                <i />
               </span>
             </div>
-            <div className="pv-grid">
-              <div className="pv-card pv-feat">
-                <div className="thumb">
-                  <img className="thumb-img" src={talirDrevostavba} alt="" />
-                  <span className="pv-new">Nové</span>
-                  <span className="dur">{top.video.d}</span>
+            {rows.map((r) => (
+              <div className="pv-shelf" key={r.t}>
+                <div className="pv-shelf-t">{r.t}</div>
+                <div className="pv-row">
+                  {(r.list.length === 1 ? [...r.list, ...items.slice(5, 9).map((f) => ({ x: f.video, sub: `${f.topic} · ${fmtAgo(f.date)}`, pct: 100 }))] : r.list)
+                    .slice(0, compact ? 3 : 5)
+                    .map(({ x, sub, pct }) => (
+                      <div className="pv-card" key={x.v}>
+                        <div className="thumb">
+                          <Thumb video={x} eager />
+                          <span className="dur">{x.d}</span>
+                          {pct > 0 && (
+                            <span className="pv-prog">
+                              <i style={{ width: `${pct}%` }} />
+                            </span>
+                          )}
+                        </div>
+                        <b>{x.t}</b>
+                        <small>{sub}</small>
+                      </div>
+                    ))}
                 </div>
-                <b>{top.video.t}</b>
-                <p>{top.video.desc}</p>
-                <small>
-                  {top.topic} · {fmtAgo(top.date)} · <Heart /> {top.likes}
-                </small>
               </div>
-              {rest.slice(0, compact ? 2 : 8).map((f) => (
-                <div className="pv-card" key={f.v}>
-                  <div className="thumb">
-                    <Thumb video={f.video} eager />
-                    <span className="dur">{f.video.d}</span>
-                  </div>
-                  <b>{f.video.t}</b>
-                  <small>
-                    {f.topic} · {fmtAgo(f.date)}
-                  </small>
-                </div>
-              ))}
-            </div>
+            ))}
           </div>
         </div>
       </div>

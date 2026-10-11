@@ -23,10 +23,7 @@ export function Account() {
 
   return (
     <div className="page narrow">
-      <div className="page-title">
-        <h1>Účet</h1>
-      </div>
-      <p className="page-desc">Předplatné, platby a oznámení.</p>
+      <h1 className="h1">Účet</h1>
 
       <section className="profile">
         <Avatar name={`${USER.first} ${USER.last}`} size={44} />
@@ -81,6 +78,7 @@ export function Account() {
       </Group>
 
       <Group>
+        <Row label="Web Fasádní akademie" onClick={() => nav('/')} chevron />
         <Row label="Odhlásit se" onClick={() => nav('/')} danger />
       </Group>
     </div>

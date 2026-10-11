@@ -49,16 +49,13 @@ body {
 }
 
 /* najetí myší (CSS :hover nejde vyvolat skriptem) */
-.vcard.demo-hover .vcard-save {
+.vc.demo-hover .thumb img {
+  transform: scale(1.04);
+}
+.shelf.demo-hover .shelf-btn {
   opacity: 1;
-  transform: none;
 }
-.vcard.demo-hover .thumb img {
-  transform: scale(1.035);
-}
-.resume-card.demo-hover,
-.moments li button.demo-hover,
-.lrow.demo-hover {
+.stamps button.demo-hover {
   background: var(--hover);
 }
 .search.demo-focus input {

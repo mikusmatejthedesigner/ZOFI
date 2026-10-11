@@ -13,7 +13,7 @@ import './demo.css'
    kterou řídí scénář (director.ts). Web ji vkládá do <iframe>. */
 playerDemo.on = true
 const params = new URLSearchParams(location.search)
-const start = params.get('start') ?? '/app/videa'
+const start = params.get('start') ?? '/app'
 
 createRoot(document.getElementById('root')!).render(
   <MemoryRouter initialEntries={[start]}>

@@ -21,25 +21,25 @@ const STEPS: { scene: Scene; icon: typeof Search; t: string; d: string }[] = [
     scene: 'lekce',
     icon: ListVideo,
     t: 'Kapitoly a hlavní body u každé lekce.',
-    d: 'Skočíte rovnou na místo ve videu, které zrovna potřebujete. Hotovou lekci si odškrtnete.',
+    d: 'Klepnete na kapitolu a video skočí přesně tam. Další lekce je hned vedle.',
   },
   {
     scene: 'pokracovat',
     icon: GraduationCap,
     t: 'Pokračujete tam, kde jste skončili.',
-    d: 'Aplikace si pamatuje rozkoukané kurzy. Jedno klepnutí a jedete dál.',
+    d: 'Na úvodní obrazovce čekají rozkoukané kurzy. Jedno klepnutí a jedete dál.',
   },
   {
     scene: 'ulozit',
     icon: Bookmark,
     t: 'Detaily si uložíte na stavbu.',
-    d: 'Video uložíte jedním klepnutím. Na lešení ho pak máte po ruce v Uložených.',
+    d: 'Video uložíte jedním klepnutím. V Knihovně ho pak máte po ruce i na lešení.',
   },
   {
     scene: 'tma',
     icon: Moon,
-    t: 'Ve dne i večer.',
-    d: 'Světlý i tmavý režim podle nastavení vašeho zařízení.',
+    t: 'Spousta videí, čisté prostředí.',
+    d: 'Videa v přehledných řadách, které rostou s obsahem. Světlý i tmavý režim podle zařízení.',
   },
   {
     scene: 'mobil',
@@ -254,7 +254,7 @@ export function AppTour() {
                   <i />
                   <span className="device-url">akademie.zofi.cz</span>
                 </div>
-                <Screen size={LAPTOP} touch={false} load={near} start="/app/videa" frameRef={laptop} />
+                <Screen size={LAPTOP} touch={false} load={near} start="/app" frameRef={laptop} />
               </div>
             )}
             <div className="atour-phone">
@@ -268,7 +268,7 @@ export function AppTour() {
                     <i />
                   </span>
                 </div>
-                <Screen size={PHONE} touch load={near} start="/app/videa" frameRef={phone} />
+                <Screen size={PHONE} touch load={near} start="/app" frameRef={phone} />
               </div>
             </div>
             {/* mobil: text aktuálního kroku pod telefonem */}

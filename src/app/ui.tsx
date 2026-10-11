@@ -1,274 +1,252 @@
-import { useCallback, useImperativeHandle, useLayoutEffect, useRef, useState, type ReactNode, type Ref } from 'react'
+import { useCallback, useEffect, useImperativeHandle, useRef, useState, type ReactNode, type Ref } from 'react'
 import { Link } from 'react-router'
-import gsap from 'gsap'
-import { Bookmark, Check, Heart, ListVideo, Play } from 'lucide-react'
-import { AnimatedCircularProgressBar } from '@/components/magicui/animated-circular-progress-bar'
-import { NumberTicker } from '@/components/magicui/number-ticker'
+import { Bookmark, ChevronLeft, ChevronRight, Heart, ListVideo, Play } from 'lucide-react'
 import { Thumb } from '../components/Thumb'
 import {
-  courseLessons,
   courseSecs,
   fmtDuration,
   fmtTime,
-  secs,
   plural,
+  secs,
   videoHref,
   vid,
   type Course,
   type Video,
 } from '../data/catalog'
 import { progress, useProgress } from '../lib/progress'
-import { ToastCtx, playerDemo, useCourseProgress, useMounted, useToast, videoMeta } from './hooks'
+import { ToastCtx, playerDemo, useCourseProgress, useToast, videoMeta } from './hooks'
 
-/* ---------- průběh ---------- */
-export function Bar({ pct }: { pct: number }) {
-  const on = useMounted()
+/* ====================================================================
+   Stavební kameny aplikace. Jedna karta videa, jedna karta kurzu,
+   vodorovná řada a velký banner. Nic není postavené na počtu videí.
+   ==================================================================== */
+
+/** Tenký pruh průběhu ve spodní části náhledu (jako na YouTube). */
+function Prog({ pct }: { pct: number }) {
   return (
-    <div className="pbar" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
-      <i style={{ width: `${on ? pct : 0}%` }} />
-    </div>
+    <span className="prog" aria-hidden>
+      <i style={{ width: `${pct}%` }} />
+    </span>
   )
 }
 
-/** Malý kroužek průběhu do postranního panelu. */
-export function MiniRing({ pct }: { pct: number }) {
-  const on = useMounted()
-  const c = 2 * Math.PI * 7
-  return (
-    <svg className={`mini-ring${pct >= 100 ? ' full' : ''}`} viewBox="0 0 18 18" aria-hidden>
-      <circle className="track" cx="9" cy="9" r="7" />
-      <circle className="val" cx="9" cy="9" r="7" strokeDasharray={c} strokeDashoffset={c * (1 - (on ? pct : 0) / 100)} />
-    </svg>
-  )
-}
-
-/** Kruhový ukazatel průběhu kurzu (Magic UI), při načtení se doplní od nuly. */
-export function Gauge({ pct, className = 'size-12 text-[12px]' }: { pct: number; className?: string }) {
-  const on = useMounted()
-  return (
-    <AnimatedCircularProgressBar
-      value={on ? pct : 0}
-      gaugePrimaryColor="var(--accent)"
-      gaugeSecondaryColor="var(--fill)"
-      className={`${className} shrink-0 font-semibold tabular-nums`}
-    />
-  )
-}
-
-/* ---------- karta videa ---------- */
-export function VideoCard({ x, eager = false }: { x: Video; eager?: boolean }) {
-  const { watched, saved, liked } = useProgress()
-  const toast = useToast()
+/* ---------- karta videa: náhled, název, jeden řádek popisku ---------- */
+export function VCard({ x, sub, pct }: { x: Video; sub?: string; pct?: number }) {
+  const { watched } = useProgress()
   const m = videoMeta(x)
   const seen = watched.includes(x.v)
-  const isSaved = saved.includes(x.v)
+  const bar = pct ?? (seen ? 100 : undefined)
   return (
-    <article className="vcard">
-      <div className="thumb">
-        <Thumb video={x} size="lg" eager={eager} />
-        <span className="dur">{x.d}</span>
-        {x.isNew && !seen && <span className="badge-new">Nové</span>}
-        {seen && (
-          <span className="thumb-seen" aria-label="Zhlédnuto">
-            <Check strokeWidth={3.5} />
-          </span>
-        )}
-      </div>
-      <button
-        className={`vcard-save${isSaved ? ' on' : ''}`}
-        aria-label={isSaved ? 'Odebrat z uložených' : 'Uložit'}
-        aria-pressed={isSaved}
-        onClick={() => {
-          progress.save(x.v)
-          toast(isSaved ? 'Odebráno z uložených.' : 'Uloženo do knihovny.')
-        }}
-      >
-        <Bookmark fill={isSaved ? 'currentColor' : 'none'} aria-hidden />
-      </button>
-      <div className="vcard-body">
-        <h3 className="vcard-title">
-          <Link className="stretch" to={videoHref(x.v)}>
-            {x.t}
-          </Link>
-        </h3>
-        <p className="vcard-desc">{x.desc}</p>
-        <div className="vcard-meta">
-          <b>{m.label}</b>
-          {m.sub && (
-            <>
-              <span className="dot" aria-hidden />
-              <span>{m.sub}</span>
-            </>
-          )}
-          {m.likes !== undefined && (
-            <>
-              <span className="dot" aria-hidden />
-              <span className="likes" aria-label="To se mi líbí">
-                <Heart aria-hidden />
-                {m.likes + (liked.includes(x.v) ? 1 : 0)}
-              </span>
-            </>
-          )}
-        </div>
-      </div>
-    </article>
-  )
-}
-
-/** Malý řádek videa (další videa). */
-export function VideoRow({ x }: { x: Video }) {
-  const m = videoMeta(x)
-  return (
-    <Link className="vrow" to={videoHref(x.v)}>
+    <Link className="vc" to={videoHref(x.v)}>
       <span className="thumb">
-        <Thumb video={x} size="sm" />
+        <Thumb video={x} />
         <span className="dur">{x.d}</span>
+        {bar !== undefined && <Prog pct={bar} />}
       </span>
-      <span>
-        <b>{x.t}</b>
-        <small>
-          {m.label}
-          {m.sub && ` · ${m.sub}`}
-        </small>
+      <span className="vc-title">{x.t}</span>
+      <span className="vc-meta">
+        {x.isNew && !seen && !sub && <em>Nové</em>}
+        {sub ?? [m.label, m.sub].filter(Boolean).join(' · ')}
       </span>
     </Link>
   )
 }
 
-/* ---------- kurzy ---------- */
-export function CourseCard({ c }: { c: Course }) {
+/* ---------- karta kurzu: plakát s názvem (jako seriál) ---------- */
+export function CCard({ c }: { c: Course }) {
   const p = useCourseProgress(c)
   return (
-    <Link className="ctile" to={`/app/kurzy/${c.id}`}>
-      <div className="thumb">
+    <Link className="cc" to={`/app/kurzy/${c.id}`}>
+      <span className="thumb">
         <Thumb video={vid(c.cover)!} size="lg" />
-        <span className="ctile-lessons">
-          <ListVideo aria-hidden />
-          {p.total} {plural(p.total, 'lekce', 'lekce', 'lekcí')}
+        <span className="cc-in">
+          <small>
+            <ListVideo aria-hidden />
+            {p.total} {plural(p.total, 'lekce', 'lekce', 'lekcí')} · {fmtDuration(courseSecs(c))}
+          </small>
+          <b>{c.title}</b>
         </span>
-      </div>
-      <div className="ctile-body">
-        <span className="ctile-level">{c.level}</span>
-        <h3>{c.title}</h3>
-        <p>{c.desc}</p>
-        <div className="ctile-foot">
-          <Bar pct={p.pct} />
-          <span>{p.done ? `${p.done} z ${p.total}` : 'Nezačato'}</span>
-          <span className="dot" aria-hidden />
-          <span>{fmtDuration(courseSecs(c))}</span>
-        </div>
-      </div>
+        {p.done > 0 && <Prog pct={p.pct} />}
+      </span>
     </Link>
   )
 }
 
-/** Rozkoukaný kurz: kde jste skončili a kolik zbývá. */
-export function ResumeCard({ c, at }: { c: Course; at: string }) {
-  const p = useCourseProgress(c)
-  const x = vid(at)!
+/* ---------- řádek videa vedle přehrávače a ve výsledcích ---------- */
+export function VRow({ x, big = false }: { x: Video; big?: boolean }) {
+  const m = videoMeta(x)
+  const { watched } = useProgress()
   return (
-    <Link className="resume-card" to={`/app/kurzy/${c.id}/${at}`}>
+    <Link className={big ? 'vr vr-big' : 'vr'} to={videoHref(x.v)}>
       <span className="thumb">
-        <Thumb video={x} size="sm" eager />
+        <Thumb video={x} size={big ? 'md' : 'sm'} />
+        <span className="dur">{x.d}</span>
+        {watched.includes(x.v) && <Prog pct={100} />}
       </span>
       <span>
-        <small>
-          {c.short} · Lekce {courseLessons(c).indexOf(at) + 1} z {p.total}
-        </small>
         <b>{x.t}</b>
-        <Bar pct={p.pct} />
-      </span>
-      <span className="play-dot" aria-hidden>
-        <Play fill="currentColor" strokeWidth={0} />
+        <small>{[m.label, m.sub].filter(Boolean).join(' · ')}</small>
+        {big && <p>{x.desc}</p>}
       </span>
     </Link>
   )
 }
 
-/* ---------- záložky s posuvným podtržením (GSAP) ---------- */
-export type TabItem<T extends string> = { id: T; label: string; count?: number }
-
-export function Tabs<T extends string>({
-  items,
-  value,
-  onChange,
-  label,
-  className = '',
-}: {
-  items: TabItem<T>[]
-  value: T
-  onChange: (v: T) => void
-  label: string
-  className?: string
-}) {
-  const box = useRef<HTMLDivElement>(null)
-  const ink = useRef<HTMLSpanElement>(null)
-  const first = useRef(true)
-
-  useLayoutEffect(() => {
-    const btn = box.current?.querySelector<HTMLElement>('[aria-selected="true"]')
-    if (!btn || !ink.current) return
-    const to = { x: btn.offsetLeft + 10, width: btn.offsetWidth - 20 }
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (first.current || reduce) gsap.set(ink.current, to)
-    else gsap.to(ink.current, { ...to, duration: 0.45, ease: 'expo.out', overwrite: true })
-    first.current = false
-    // aktivní záložka viditelná i na úzkém displeji (posouvá jen řádek záložek)
-    const row = box.current!
-    const l = btn.offsetLeft
-    const r = l + btn.offsetWidth
-    if (l < row.scrollLeft) row.scrollLeft = l - 16
-    else if (r > row.scrollLeft + row.clientWidth) row.scrollLeft = r - row.clientWidth + 16
-  }, [value, items.length])
-
+/* ---------- vodorovná řada (Netflix, Apple TV): unese libovolný počet ---------- */
+export function Shelf({ title, to, wide = false, children }: { title: string; to?: string; wide?: boolean; children: ReactNode }) {
+  const row = useRef<HTMLDivElement>(null)
+  const [edge, setEdge] = useState({ start: true, end: true })
+  const update = useCallback(() => {
+    const el = row.current
+    if (!el) return
+    setEdge({ start: el.scrollLeft < 8, end: el.scrollLeft + el.clientWidth > el.scrollWidth - 8 })
+  }, [])
+  useEffect(() => {
+    const el = row.current
+    if (!el) return
+    const ro = new ResizeObserver(update)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [update])
+  const go = (dir: number) => {
+    const el = row.current
+    if (el) el.scrollBy({ left: dir * el.clientWidth * 0.85, behavior: 'smooth' })
+  }
   return (
-    <div className={`tabs ${className}`} role="tablist" aria-label={label} ref={box}>
-      {items.map((t) => (
-        <button
-          key={t.id}
-          role="tab"
-          aria-selected={value === t.id}
-          className={`tab-btn${value === t.id ? ' on' : ''}`}
-          onClick={() => onChange(t.id)}
-        >
-          {t.label}
-          {t.count !== undefined && <em>{t.count}</em>}
-        </button>
-      ))}
-      <span className="tab-ink" ref={ink} aria-hidden />
-    </div>
+    <section className="shelf">
+      <h2 className="shelf-title">
+        {to ? (
+          <Link to={to}>
+            {title}
+            <ChevronRight aria-hidden />
+          </Link>
+        ) : (
+          title
+        )}
+      </h2>
+      <div className="shelf-wrap">
+        <div className={`shelf-row${wide ? ' wide' : ''}`} ref={row} onScroll={update}>
+          {children}
+        </div>
+        {!edge.start && (
+          <button className="shelf-btn prev" onClick={() => go(-1)} aria-label="Posunout zpět">
+            <ChevronLeft />
+          </button>
+        )}
+        {!edge.end && (
+          <button className="shelf-btn next" onClick={() => go(1)} aria-label="Posunout dál">
+            <ChevronRight />
+          </button>
+        )}
+      </div>
+    </section>
   )
 }
 
-/* ---------- Líbí se a Uložit (spojená tlačítka) ---------- */
-export function LikeSave({ id, likes }: { id: string; likes?: number }) {
-  const { liked, saved } = useProgress()
-  const toast = useToast()
-  const isLiked = liked.includes(id)
-  const isSaved = saved.includes(id)
+/* ---------- velký banner nahoře (Apple TV): střídá pár zvýrazněných položek ---------- */
+export type FeatureItem = {
+  key: string
+  kicker: string
+  title: string
+  meta: string
+  text: string
+  video: Video
+  to: string
+  cta: string
+  /** druhé tlačítko: odkaz (např. osnova kurzu), jinak Uložit */
+  more?: { to: string; label: string }
+}
+
+export function Feature({ items }: { items: FeatureItem[] }) {
+  const [i, setI] = useState(0)
+  const [paused, setPaused] = useState(false)
+  useEffect(() => {
+    if (paused || items.length < 2) return
+    const t = window.setTimeout(() => setI((n) => (n + 1) % items.length), 8000)
+    return () => window.clearTimeout(t)
+  }, [i, paused, items.length])
+  const cur = items[Math.min(i, items.length - 1)]
+  if (!cur) return null
   return (
-    <div className="group">
-      <button className={`b${isLiked ? ' on' : ''}`} onClick={() => progress.like(id)} aria-pressed={isLiked}>
-        <Heart aria-hidden fill={isLiked ? 'currentColor' : 'none'} />
-        {likes !== undefined ? (
-          <NumberTicker value={likes + (isLiked ? 1 : 0)} startValue={Math.max(0, likes - 12)} className="tabular-nums" />
-        ) : (
-          'Líbí se'
-        )}
-        <span className="sr-only">To se mi líbí</span>
-      </button>
-      <button
-        className={`b${isSaved ? ' on' : ''}`}
-        onClick={() => {
-          progress.save(id)
-          toast(isSaved ? 'Odebráno z uložených.' : 'Uloženo do knihovny.')
-        }}
-        aria-pressed={isSaved}
-      >
-        <Bookmark aria-hidden fill={isSaved ? 'currentColor' : 'none'} />
-        {isSaved ? 'Uloženo' : 'Uložit'}
-      </button>
-    </div>
+    <section
+      className={`feat${paused ? ' paused' : ''}`}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      aria-roledescription="carousel"
+    >
+      {items.map((it, k) => (
+        <div key={it.key} className={`feat-slide${k === i ? ' on' : ''}`} aria-hidden={k !== i}>
+          <Thumb video={it.video} size="lg" eager={k === 0} />
+        </div>
+      ))}
+      <div className="feat-shade" aria-hidden />
+      <div className="feat-in" key={cur.key}>
+        <span className="feat-kicker">{cur.kicker}</span>
+        <h1>{cur.title}</h1>
+        <p className="feat-meta">{cur.meta}</p>
+        <p className="feat-text">{cur.text}</p>
+        <div className="feat-cta">
+          <Link className="b b-light b-lg" to={cur.to}>
+            <Play aria-hidden fill="currentColor" strokeWidth={0} />
+            {cur.cta}
+          </Link>
+          {cur.more ? (
+            <Link className="b b-glass b-lg" to={cur.more.to}>
+              {cur.more.label}
+            </Link>
+          ) : (
+            <SaveBtn id={cur.video.v} glass />
+          )}
+        </div>
+      </div>
+      {items.length > 1 && (
+        <div className="feat-dots">
+          {items.map((it, k) => (
+            <button
+              key={it.key}
+              className={k === i ? 'on' : ''}
+              onClick={() => setI(k)}
+              aria-label={`Ukázat: ${it.title}`}
+              aria-current={k === i}
+            >
+              <i />
+            </button>
+          ))}
+        </div>
+      )}
+    </section>
+  )
+}
+
+/* ---------- tlačítka u videa ---------- */
+export function SaveBtn({ id, glass = false }: { id: string; glass?: boolean }) {
+  const { saved } = useProgress()
+  const toast = useToast()
+  const on = saved.includes(id)
+  return (
+    <button
+      className={`b ${glass ? 'b-glass b-lg' : 'b-pill'}${on ? ' on' : ''}`}
+      aria-pressed={on}
+      onClick={() => {
+        progress.save(id)
+        toast(on ? 'Odebráno z knihovny.' : 'Uloženo do knihovny.')
+      }}
+    >
+      <Bookmark aria-hidden fill={on ? 'currentColor' : 'none'} />
+      {on ? 'Uloženo' : 'Uložit'}
+    </button>
+  )
+}
+
+export function LikeBtn({ id, likes }: { id: string; likes: number }) {
+  const { liked } = useProgress()
+  const on = liked.includes(id)
+  return (
+    <button className={`b b-pill${on ? ' on' : ''}`} aria-pressed={on} onClick={() => progress.like(id)}>
+      <Heart aria-hidden fill={on ? 'currentColor' : 'none'} />
+      {likes + (on ? 1 : 0)}
+      <span className="sr-only">To se mi líbí</span>
+    </button>
   )
 }
 

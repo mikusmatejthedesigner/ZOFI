@@ -125,7 +125,7 @@ type H = ReturnType<typeof helpers>
 const SCENES: Record<Scene, (h: H) => Promise<void>> = {
   // hledání napříč videi i lekcemi, výběr šipkami a Enter otevře lekci
   async hledani({ go, find, point, type, key, wait, scrollTo }) {
-    await go('/app/videa')
+    await go('/app')
     const box = await find('.search')
     const input = await find<HTMLInputElement>('.search input')
     await point(input)
@@ -134,9 +134,9 @@ const SCENES: Record<Scene, (h: H) => Promise<void>> = {
     await wait(250)
     await type(input, 'kotvení')
     await wait(900)
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 5; i++) {
       key(input, 'ArrowDown')
-      await wait(280)
+      await wait(260)
     }
     await point(await find('.search-pop a.sel'), 0.5)
     await wait(300)
@@ -144,32 +144,32 @@ const SCENES: Record<Scene, (h: H) => Promise<void>> = {
     key(input, 'Enter')
     box.classList.remove('demo-focus')
     await wait(1700)
-    await scrollTo(240)
+    await scrollTo(260)
     await wait(1400)
   },
 
-  // lekce: kapitoly ve videu (skok v přehrávači) a označení jako hotové
-  async lekce({ go, find, tap, hover, wait }) {
+  // lekce: kapitoly ve videu (skok v přehrávači) a další lekce
+  async lekce({ go, find, tap, hover, wait, scrollTo }) {
     await go('/app/kurzy/zatepleni/gzl2szVtVQo')
-    await tap(await find('.tab-btn', 'Kapitoly'))
-    await wait(500)
     for (const i of [1, 2]) {
-      const items = [...document.querySelectorAll<HTMLElement>('.moments li button')]
+      const items = [...document.querySelectorAll<HTMLElement>('.stamps button')]
       const el = items[Math.min(i, items.length - 1)]
+      if (!el) break
       hover(el)
       await tap(el)
       hover(el, false)
       await wait(900)
     }
-    await tap(await find('.l-head .group .b'))
-    await wait(1800)
+    await scrollTo(0)
+    await tap(await find('.w-actions a.b-primary', 'Další'))
+    await wait(2000)
   },
 
-  // Kurzy: rozkoukané kurzy a pokračování jedním klepnutím
+  // Domů: rozkoukané kurzy a pokračování jedním klepnutím
   async pokracovat({ go, find, point, tap, hover, wait }) {
-    await go('/app/kurzy')
-    await wait(700)
-    const card = await find('.resume-card')
+    await go('/app')
+    await wait(900)
+    const card = await find('.shelf .vc')
     hover(card)
     await point(card)
     await wait(500)
@@ -178,41 +178,43 @@ const SCENES: Record<Scene, (h: H) => Promise<void>> = {
     await wait(2200)
   },
 
-  // uložení videa na později: záložka, oznámení, počet v Uložených
-  async ulozit({ go, find, point, tap, hover, wait }) {
-    await go('/app/videa')
-    await wait(400)
-    const card = [...document.querySelectorAll<HTMLElement>('.vgrid .vcard')][1] ?? (await find('.vgrid .vcard'))
-    hover(card)
-    await point(card.querySelector<HTMLElement>('.thumb') ?? card)
-    await wait(350)
-    await tap(card.querySelector<HTMLElement>('.vcard-save') ?? card)
+  // uložení videa na později a Knihovna
+  async ulozit({ go, find, tap, wait }) {
+    await go('/app/videa/cXmpSogRKKY')
+    await wait(500)
+    await tap(await find('.w-actions .b-pill', 'Uložit'))
     await wait(1400)
-    hover(card, false)
-    await tap(await find('.sb-item[href$="/ulozene"], .tabbar a[href$="/ulozene"]'))
-    await wait(2200)
+    await tap(await find('.rail a[href$="/knihovna"], .tabbar a[href$="/knihovna"]'))
+    await wait(2400)
   },
 
-  // tmavý režim: celá aplikace se přebarví
-  async tma({ go, find, tap, wait, scrollTo, hideCursor }) {
-    await go('/app/kurzy/zatepleni')
+  // tmavý režim a řady videí, které se posouvají do strany
+  async tma({ go, tap, hover, wait, scrollTo, hideCursor }) {
+    await go('/app')
     await wait(900)
     hideCursor()
     theme(true)
-    await wait(1600)
-    await scrollTo(300)
-    await wait(600)
-    await tap(await find('.chapter-head'))
-    await wait(1800)
+    await wait(1500)
+    const shelves = [...document.querySelectorAll<HTMLElement>('.shelf')]
+    const shelf = shelves[1] ?? shelves[0]
+    if (shelf) {
+      await scrollTo(scrollY + shelf.getBoundingClientRect().top - 120)
+      hover(shelf)
+      const next = shelf.querySelector<HTMLElement>('.shelf-btn.next')
+      if (next) await tap(next)
+      await wait(1200)
+      const again = shelf.querySelector<HTMLElement>('.shelf-btn.next')
+      if (again) await tap(again)
+      hover(shelf, false)
+    }
+    await wait(1500)
   },
 
   // telefon: lekce, kapitoly a seznam lekcí pod videem
-  async mobil({ go, find, tap, wait, scrollTo }) {
+  async mobil({ go, tap, wait, scrollTo }) {
     await go('/app/kurzy/zatepleni/Er5tVaQ3u2U')
     await wait(500)
-    await tap(await find('.tab-btn', 'Kapitoly'))
-    await wait(500)
-    const items = [...document.querySelectorAll<HTMLElement>('.moments li button')]
+    const items = [...document.querySelectorAll<HTMLElement>('.stamps button')]
     if (items[1]) await tap(items[1])
     await wait(1100)
     await scrollTo(document.documentElement.scrollHeight)

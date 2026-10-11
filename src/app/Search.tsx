@@ -12,8 +12,9 @@ export function Search() {
   const input = useRef<HTMLInputElement>(null)
   const [q, setQ] = useState('')
   const [open, setOpen] = useState(false)
-  const [sel, setSel] = useState(0)
-  const { videos, lessons } = useVideoSearch(q)
+  // -1 = nic nevybráno, Enter pak otevře všechny výsledky
+  const [sel, setSel] = useState(-1)
+  const { videos, lessons, total } = useVideoSearch(q)
   const all = [...videos, ...lessons]
   const mac = /Mac|iPhone|iPad/.test(navigator.platform)
 
@@ -43,6 +44,11 @@ export function Search() {
     nav(videoHref(x.v))
     input.current?.blur()
   }
+  const goAll = () => {
+    if (!q.trim()) return
+    nav(`/app/hledat?q=${encodeURIComponent(q.trim())}`)
+    input.current?.blur()
+  }
 
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'ArrowDown') {
@@ -50,9 +56,10 @@ export function Search() {
       setSel((s) => Math.min(s + 1, all.length - 1))
     } else if (e.key === 'ArrowUp') {
       e.preventDefault()
-      setSel((s) => Math.max(s - 1, 0))
-    } else if (e.key === 'Enter' && all[sel]) {
-      go(all[sel])
+      setSel((s) => Math.max(s - 1, -1))
+    } else if (e.key === 'Enter') {
+      if (all[sel]) go(all[sel])
+      else goAll()
     } else if (e.key === 'Escape') {
       setOpen(false)
       input.current?.blur()
@@ -96,7 +103,7 @@ export function Search() {
         value={q}
         onChange={(e) => {
           setQ(e.target.value)
-          setSel(0)
+          setSel(-1)
           setOpen(true)
         }}
         onFocus={() => setOpen(true)}
@@ -115,6 +122,11 @@ export function Search() {
           {videos.map((x, i) => item(x, i))}
           {lessons.length > 0 && <h4>Lekce v kurzech</h4>}
           {lessons.map((x, i) => item(x, videos.length + i))}
+          {total > 0 && (
+            <button className="search-all" onMouseDown={(e) => e.preventDefault()} onClick={goAll}>
+              Zobrazit všechny výsledky ({total})
+            </button>
+          )}
         </div>
       )}
     </div>
