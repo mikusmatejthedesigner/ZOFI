@@ -25,9 +25,12 @@ Neměnit schválený styl bez souhlasu. Nepublikovat nic za ZOFI bez rozhodnutí
 
 Vlastní placená platforma na videokurzy ZOFI, náhrada za Herohero, Patreon a členství na YouTube (bez jejich poplatků a s plnou kontrolou). Videa s hodnotou, která nechceme dávat na YouTube zdarma, jsou rozdělená do kurzů za paywallem.
 
-- **Dvě části:** prodejní web (musí zákazníkovi aplikaci prodat) a aplikace. Tlačítko přihlášení vede z webu rovnou do aplikace.
-- **Vzhled:** Apple styl, čistá a praktická aplikace. Barvy a typografie z `prototyp/shared/base.css`.
-- **Stav:** zatím jen prototyp, nic nemá fungovat doopravdy (přihlášení, platby, videa).
-- **Technika:** Vite + React + TypeScript, animace GSAP (`gsap`, `@gsap/react`), plynulý scroll Lenis (`src/lib/smooth-scroll.ts`). React Bits není balíček: komponenty se kopírují jednotlivě (`npx shadcn@latest add @react-bits/<Název>-<JS|TS>-<CSS|TW>`), licence MIT + Commons Clause.
+- **Dvě části:** prodejní web na `/` (musí zákazníkovi aplikaci prodat, animovaný, moderní) a aplikace na `/app` (přehledná a jednoduchá jako od Apple). „Přihlásit se“ vede z webu rovnou do aplikace.
+- **Vzhled:** Apple styl. Barvy a typografie v `src/styles/base.css` (vychází z `prototyp/shared/base.css`), písmo systémové, jinde Inter. Aplikace má světlý i tmavý režim podle systému, web ne.
+- **Stav:** prototyp. Přihlášení, platby a předplatné jen vypadají jako skutečné. Průběh lekcí se ukládá do prohlížeče (`src/lib/progress.ts`). Videa jsou z YouTube (`youtube-nocookie.com`). Pro skutečný paywall budou potřeba neveřejná videa jinde (např. Bunny Stream, Mux, Cloudflare Stream).
+- **Obsah:** `src/data/` (videa, kurzy, okamžiky a hlavní body lekcí) převzatý z prototypu. Rozdělení do kurzů, ceny a okamžiky ve videích jsou zástupné. Texty vrstev fasády a hlavních bodů ověřit s technikem.
+- **Struktura:** `src/web/` (sekce webu, `web.css`), `src/app/` (rozvržení, `pages/`, `app.css`), `src/components/reactbits/` (převzaté a upravené komponenty React Bits), `src/lib/` (Lenis, česká typografie, průběh).
+- **Technika:** Vite + React + TypeScript, React Router, ikony lucide-react, animace GSAP (`gsap`, `@gsap/react`, ScrollTrigger, SplitText), plynulý scroll Lenis jen na webu (`src/lib/smooth-scroll.ts`). React Bits není balíček: komponenty se kopírují jednotlivě (`npx shadcn@latest add @react-bits/<Název>-<JS|TS>-<CSS|TW>`, případně z github.com/DavidHDev/react-bits), licence MIT + Commons Clause.
+- **Česká typografie:** `useCzechTypography` doplní nezlomitelné mezery za jednopísmenné předložky. Text, který se dál dělí na slova (SplitText, ScrollReveal), předem projít funkcí `cz()`.
 - **`prototyp/`:** původní statický prototyp (`index.html`, `app.html`, `shared/`). Slouží jen jako reference, nestavíme na něm.
-- **Příkazy:** `npm run dev` (vývoj), `npm run build`, `npm run lint`.
+- **Příkazy:** `npm run dev` (vývoj), `npm run build`, `npm run lint`. Hosting jako SPA (`public/_redirects` pro Netlify).
