@@ -65,7 +65,7 @@ export interface VideoTextProps {
    * The element type to render for the text
    * @default "div"
    */
-  as?: ElementType
+  as?: ElementType<any, keyof HTMLElementTagNameMap>
 }
 
 export function VideoText({

@@ -1,43 +1,31 @@
 import { useLayoutEffect, useRef, useState, type CSSProperties } from 'react'
-import { Link } from 'react-router'
 import { gsap } from 'gsap'
 import { useGSAP } from '@gsap/react'
-import { ArrowRight, Check, House, LayoutGrid, Lock, Play, UserRound } from 'lucide-react'
-import SplitText from '../components/reactbits/SplitText'
-import Magnet from '../components/reactbits/Magnet'
+import { Check, House, LayoutGrid, Lock, Play, UserRound } from 'lucide-react'
+import { BorderBeam } from '@/components/magicui/border-beam'
 import { Logo } from '../components/Logo'
 import { Thumb } from '../components/Thumb'
-import { COURSES, PLANS, courseLessons, newest, vid } from '../data/catalog'
-import { cz } from '../lib/czech'
-import { goTo } from '../lib/smooth-scroll'
+import { COURSES, courseLessons, vid } from '../data/catalog'
 
-const INTRO = '7DFgjeVmT1Y'
-
-export function Hero() {
+/** Ukázka aplikace: okno se při scrollu narovná a za myší se jemně naklání ve 3D. */
+export function AppShowcase() {
   const ref = useRef<HTMLElement>(null)
-  const fresh = newest()[0]
 
   useGSAP(
     () => {
       const mm = gsap.matchMedia()
       mm.add('(prefers-reduced-motion: no-preference)', () => {
-        const tl = gsap.timeline({ defaults: { ease: 'expo.out' } })
-        tl.from('.hero-pill', { y: 16, opacity: 0, duration: 1 }, 0.1)
-          .from(['.hero-sub', '.hero-cta', '.hero-meta'], { y: 24, opacity: 0, duration: 1.2, stagger: 0.08 }, 0.55)
-          .from('.hero-stage', { y: 120, opacity: 0, duration: 1.8 }, 0.75)
-
-        // Okno aplikace se při scrollu narovná (Apple styl).
         gsap.fromTo(
-          '.device',
-          { rotateX: 24, scale: 0.9 },
+          '.device-tilt',
+          { rotateX: 28, scale: 0.86, y: 60 },
           {
             rotateX: 0,
             scale: 1,
+            y: 0,
             ease: 'none',
-            scrollTrigger: { trigger: '.hero-stage', start: 'top 92%', end: 'top 12%', scrub: 0.6 },
+            scrollTrigger: { trigger: '.hero-stage', start: 'top 95%', end: 'top 20%', scrub: 0.6 },
           },
         )
-        // Štítky kolem okna plují různou rychlostí.
         gsap.utils.toArray<HTMLElement>('[data-speed]').forEach((el) => {
           gsap.to(el, {
             y: () => -window.innerHeight * Number(el.dataset.speed),
@@ -46,90 +34,59 @@ export function Hero() {
           })
         })
       })
+      // naklánění za myší (jen myš, ne dotyk)
+      mm.add('(hover: hover) and (prefers-reduced-motion: no-preference)', () => {
+        const stage = ref.current?.querySelector<HTMLElement>('.hero-stage')
+        const dev = ref.current?.querySelector<HTMLElement>('.device')
+        if (!stage || !dev) return
+        const rx = gsap.quickTo(dev, 'rotationX', { duration: 0.8, ease: 'power3.out' })
+        const ry = gsap.quickTo(dev, 'rotationY', { duration: 0.8, ease: 'power3.out' })
+        const onMove = (e: PointerEvent) => {
+          const r = stage.getBoundingClientRect()
+          ry(((e.clientX - r.left) / r.width - 0.5) * 9)
+          rx(-((e.clientY - r.top) / r.height - 0.5) * 7)
+        }
+        const onLeave = () => {
+          rx(0)
+          ry(0)
+        }
+        stage.addEventListener('pointermove', onMove)
+        stage.addEventListener('pointerleave', onLeave)
+        return () => {
+          stage.removeEventListener('pointermove', onMove)
+          stage.removeEventListener('pointerleave', onLeave)
+        }
+      })
       return () => mm.revert()
     },
     { scope: ref },
   )
 
   return (
-    <section ref={ref} className="hero" id="top">
-      <div className="wrap">
-        {fresh && (
-          <Link className="hero-pill" to={`/app/lekce/${fresh.v}`}>
-            <b>Nové</b>
-            <span>{fresh.t}</span>
-            <ArrowRight aria-hidden />
-          </Link>
-        )}
-        <h1 className="hero-title">
-          <SplitText
-            tag="span"
-            className="l1"
-            text={cz('Fasáda se dělá jednou.')}
-            splitType="words"
-            delay={80}
-            duration={1.3}
-            ease="expo.out"
-            from={{ opacity: 0, y: 48, filter: 'blur(12px)' }}
-            to={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-            threshold={0}
-            rootMargin="0px"
-          />
-          <SplitText
-            tag="span"
-            className="l2"
-            text={cz('Udělejte ji pořádně.')}
-            splitType="words"
-            delay={80}
-            duration={1.3}
-            ease="expo.out"
-            from={{ opacity: 0, y: 48, filter: 'blur(12px)' }}
-            to={{ opacity: 1, y: 0, filter: 'blur(0px)', delay: 0.28 }}
-            threshold={0}
-            rootMargin="0px"
-          />
-        </h1>
-        <p className="hero-sub">
-          Videokurzy zateplení natočené na skutečných stavbách ZOFI. Od lešení po poslední zatočení omítky, v pořadí, v
-          jakém se opravdu staví.
+    <section ref={ref} id="aplikace-ukazka" className="sec showcase">
+      <div className="wrap sec-head center" data-reveal>
+        <span className="eyebrow">Aplikace</span>
+        <h2 className="h2">Celá stavba v jedné aplikaci.</h2>
+        <p className="lead">
+          Kurzy v pořadí, v jakém se staví. Rozkoukaná lekce na první obrazovce. V počítači, tabletu i telefonu.
         </p>
-        <div className="hero-cta">
-          <Magnet padding={40} magnetStrength={7}>
-            <a className="btn btn-lg" href="#cenik" onClick={goTo('#cenik')}>
-              Předplatit od {PLANS.rok.monthly} Kč měsíčně
-            </a>
-          </Magnet>
-          <Link className="btn btn-lg btn-ghost" to={`/app/lekce/${INTRO}`}>
-            <Play aria-hidden fill="currentColor" />
-            Pustit úvod zdarma
-          </Link>
-        </div>
-        <div className="hero-meta">
-          <span>
-            <Check aria-hidden /> Natočeno na stavbě, ne ve studiu
-          </span>
-          <span>
-            <Check aria-hidden /> V počítači i v mobilu
-          </span>
-          <span>
-            <Check aria-hidden /> Zrušíte kdykoliv
-          </span>
-        </div>
       </div>
-
       <div className="hero-stage">
         <div className="hero-glow" aria-hidden />
         <div className="device-wrap">
-          <div className="device">
-            <div className="device-bar" aria-hidden>
-              <i />
-              <i />
-              <i />
-              <span className="device-url">
-                <Lock /> akademie.zofi.cz
-              </span>
+          <div className="device-tilt">
+            <div className="device">
+              <div className="device-bar" aria-hidden>
+                <i />
+                <i />
+                <i />
+                <span className="device-url">
+                  <Lock /> akademie.zofi.cz
+                </span>
+              </div>
+              <AppPreview />
+              <BorderBeam size={260} duration={9} colorFrom="#e62152" colorTo="#ffb020" borderWidth={2} />
             </div>
-            <AppPreview />
           </div>
         </div>
 

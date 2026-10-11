@@ -6,9 +6,9 @@ import { useGSAP } from '@gsap/react'
 import { Logo } from '../components/Logo'
 import { initSmoothScroll, goTo } from '../lib/smooth-scroll'
 import { useCzechTypography } from '../lib/czech'
-import { Hero } from './Hero'
-import { Layers } from './Layers'
-import { Stats, Statement, Courses, Rail, Bento } from './Showcase'
+import { HouseStory } from './house/HouseStory'
+import { AppShowcase } from './AppShowcase'
+import { Stats, Statement, Courses, VideoWall, Bento } from './Showcase'
 import { Audience, Compare, Pricing, Faq, FinalCta } from './Sell'
 import './web.css'
 
@@ -46,12 +46,12 @@ export default function Landing() {
     <div ref={root} className="site">
       <Nav />
       <main>
-        <Hero />
+        <HouseStory />
+        <AppShowcase />
         <Stats />
         <Statement />
-        <Layers />
         <Courses />
-        <Rail />
+        <VideoWall />
         <Bento />
         <Audience />
         <Compare />

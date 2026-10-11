@@ -59,7 +59,7 @@ const DEFAULT_TRANSITION: ValueAnimationTransition = {
 
 interface Text3DFlipProps {
   children: React.ReactNode
-  as?: ElementType
+  as?: ElementType<any, keyof HTMLElementTagNameMap>
   className?: string
   textClassName?: string
   flipTextClassName?: string

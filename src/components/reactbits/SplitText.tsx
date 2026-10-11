@@ -152,9 +152,10 @@ const SplitText: React.FC<SplitTextProps> = ({
     },
   )
 
-  const Tag = tag as React.ElementType
+  // pevný typ značky: obecný ElementType rozbíjí typy JSX z React Three Fiber
+  const Tag = tag as 'p'
   return (
-    <Tag ref={ref} style={{ textAlign, ...style }} className={`split-parent ${className}`}>
+    <Tag ref={ref as React.RefObject<HTMLParagraphElement>} style={{ textAlign, ...style }} className={`split-parent ${className}`}>
       {text}
     </Tag>
   )

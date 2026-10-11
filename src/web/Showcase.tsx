@@ -4,6 +4,7 @@ import { gsap } from 'gsap'
 import { useGSAP } from '@gsap/react'
 import { ArrowRight, Check, Play } from 'lucide-react'
 import ScrollReveal from '../components/reactbits/ScrollReveal'
+import { NumberTicker } from '@/components/magicui/number-ticker'
 import SpotlightCard from '../components/reactbits/SpotlightCard'
 import { Thumb } from '../components/Thumb'
 import {
@@ -98,8 +99,46 @@ export function Statement() {
 
 /* ---------- kurzy ---------- */
 export function Courses() {
+  const ref = useRef<HTMLElement>(null)
+
+  // karta se za myší nakloní ve 3D a přejede po ní odlesk
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia()
+      mm.add('(hover: hover) and (prefers-reduced-motion: no-preference)', () => {
+        const offs = gsap.utils.toArray<HTMLElement>('.ccard').map((card) => {
+          const rx = gsap.quickTo(card, 'rotationX', { duration: 0.6, ease: 'power3.out' })
+          const ry = gsap.quickTo(card, 'rotationY', { duration: 0.6, ease: 'power3.out' })
+          gsap.set(card, { transformPerspective: 900 })
+          const move = (e: PointerEvent) => {
+            const r = card.getBoundingClientRect()
+            const x = (e.clientX - r.left) / r.width
+            const y = (e.clientY - r.top) / r.height
+            ry((x - 0.5) * 12)
+            rx(-(y - 0.5) * 10)
+            card.style.setProperty('--gx', `${x * 100}%`)
+            card.style.setProperty('--gy', `${y * 100}%`)
+          }
+          const leave = () => {
+            rx(0)
+            ry(0)
+          }
+          card.addEventListener('pointermove', move)
+          card.addEventListener('pointerleave', leave)
+          return () => {
+            card.removeEventListener('pointermove', move)
+            card.removeEventListener('pointerleave', leave)
+          }
+        })
+        return () => offs.forEach((off) => off())
+      })
+      return () => mm.revert()
+    },
+    { scope: ref },
+  )
+
   return (
-    <section id="kurzy" className="sec">
+    <section ref={ref} id="kurzy" className="sec">
       <div className="wrap">
         <header className="sec-head" data-reveal>
           <span className="eyebrow">Kurzy</span>
@@ -148,34 +187,61 @@ export function Courses() {
   )
 }
 
-/* ---------- pás všech videí ---------- */
-export function Rail() {
-  const half = Math.ceil(VIDEOS.length / 2)
-  const rows = [VIDEOS.slice(0, half), VIDEOS.slice(half)]
+/* ---------- 3D stěna všech videí ---------- */
+export function VideoWall() {
+  const ref = useRef<HTMLElement>(null)
+  // čtyři řady, každá jinak posunutá, aby se náhledy neopakovaly pod sebou
+  const rows = [0, 1, 2, 3].map((r) => {
+    const shifted = [...VIDEOS.slice(r * 7), ...VIDEOS.slice(0, r * 7)]
+    return [...shifted, ...shifted].slice(0, 22)
+  })
+
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia()
+      mm.add('(prefers-reduced-motion: no-preference)', () => {
+        const trig = { trigger: ref.current, start: 'top bottom', end: 'bottom top', scrub: 0.8 }
+        gsap.utils.toArray<HTMLElement>('.vwall-row').forEach((row, i) => {
+          const dir = i % 2 ? 1 : -1
+          gsap.fromTo(row, { xPercent: dir * -6 - 4 }, { xPercent: dir * 6 - 4, ease: 'none', scrollTrigger: trig })
+        })
+        gsap.fromTo(
+          '.vwall-plane',
+          { rotateX: 42, rotateZ: -18, scale: 1.05 },
+          { rotateX: 24, rotateZ: -10, scale: 1.18, ease: 'none', scrollTrigger: trig },
+        )
+      })
+      return () => mm.revert()
+    },
+    { scope: ref },
+  )
+
   return (
-    <section className="sec rail" aria-label="Všechna videa">
-      <div className="wrap sec-head center" data-reveal>
-        <h2 className="h2">{VIDEOS.length} videí ze skutečných staveb.</h2>
-        <p className="lead">
-          Lepení, kotvení, armování, sokl, hromosvody i míchárna omítek. Nová videa přibývají průběžně a jsou v ceně.
-        </p>
-      </div>
-      <div className="rail-rows">
-        {rows.map((row, r) => (
-          <div className={`rail-row${r ? ' rev' : ''}`} key={r}>
-            <div className="rail-track">
-              {[...row, ...row].map((x, i) => (
-                <figure className="rail-item" key={`${x.v}-${i}`} aria-hidden={i >= row.length || undefined}>
+    <section ref={ref} className="vwall dark" aria-label="Všechna videa">
+      <div className="vwall-stage" aria-hidden>
+        <div className="vwall-plane">
+          {rows.map((row, r) => (
+            <div className="vwall-row" key={r}>
+              {row.map((x, i) => (
+                <div className="vwall-item" key={`${x.v}-${i}`}>
                   <div className="thumb">
                     <Thumb video={x} size="sm" />
                     <span className="dur">{x.d}</span>
                   </div>
-                  <figcaption>{x.t}</figcaption>
-                </figure>
+                </div>
               ))}
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
+      </div>
+      <div className="vwall-fade" aria-hidden />
+      <div className="wrap vwall-copy" data-reveal>
+        <h2 className="h2">
+          <NumberTicker value={VIDEOS.length} className="vwall-n" /> videí ze skutečných staveb.
+        </h2>
+        <p className="lead">
+          Lepení, kotvení, armování, sokl, hromosvody i míchárna omítek. Nová videa přibývají průběžně a jsou v ceně.
+        </p>
       </div>
     </section>
   )

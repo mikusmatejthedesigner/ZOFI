@@ -1,5 +1,8 @@
 import { useState, type ReactNode } from 'react'
-import { Link } from 'react-router'
+import { Link, useNavigate } from 'react-router'
+import { BorderBeam } from '@/components/magicui/border-beam'
+import { Particles } from '@/components/magicui/particles'
+import { ShimmerButton } from '@/components/magicui/shimmer-button'
 import { Check, Factory, HardHat, Hammer, House, Minus, Paintbrush } from 'lucide-react'
 import SpotlightCard from '../components/reactbits/SpotlightCard'
 import Magnet from '../components/reactbits/Magnet'
@@ -117,6 +120,7 @@ export function Compare() {
 
 /* ---------- ceník ---------- */
 export function Pricing() {
+  const nav = useNavigate()
   const [period, setPeriod] = useState<'rok' | 'mesic'>('rok')
   const plan = PLANS[period]
   const free = VIDEOS.filter((x) => x.free).length
@@ -164,6 +168,7 @@ export function Pricing() {
           </div>
 
           <div className="plan pick" data-reveal>
+            <BorderBeam size={180} duration={7} colorFrom="#e62152" colorTo="#ffb020" borderWidth={2} />
             <span className="plan-badge">Celá akademie</span>
             <div className="plan-name">Předplatné</div>
             <div className="plan-price" key={period}>
@@ -190,9 +195,15 @@ export function Pricing() {
                 <Check aria-hidden /> Bez reklam
               </li>
             </ul>
-            <Link className="btn btn-lg" to="/app?vitejte=1">
+            <ShimmerButton
+              className="shimmer-cta"
+              background="#e62152"
+              shimmerColor="#ffd2dd"
+              shimmerDuration="2.6s"
+              onClick={() => nav('/app?vitejte=1')}
+            >
               Předplatit {period === 'rok' ? 'na rok' : 'na měsíc'}
-            </Link>
+            </ShimmerButton>
           </div>
         </div>
         <p className="team-note" data-reveal>
@@ -269,6 +280,7 @@ export function FinalCta() {
   return (
     <section className="final dark">
       <div className="final-glow" aria-hidden />
+      <Particles className="final-particles" quantity={140} ease={70} color="#ff6a88" staticity={40} />
       <div className="wrap" data-reveal>
         <h2 className="h2">Začněte první lekcí.</h2>
         <p className="lead">Úvod do seriálu je zdarma. Zbytek odemkne předplatné a celou akademii máte v kapse.</p>
