@@ -9,6 +9,8 @@ import {
   courseLessons,
   courseSecs,
   fmtDuration,
+  fmtTime,
+  secs,
   plural,
   videoHref,
   vid,
@@ -16,7 +18,7 @@ import {
   type Video,
 } from '../data/catalog'
 import { progress, useProgress } from '../lib/progress'
-import { ToastCtx, useCourseProgress, useMounted, useToast, videoMeta } from './hooks'
+import { ToastCtx, playerDemo, useCourseProgress, useMounted, useToast, videoMeta } from './hooks'
 
 /* ---------- průběh ---------- */
 export function Bar({ pct }: { pct: number }) {
@@ -299,7 +301,18 @@ export function Player({ video, ref, onPlay }: { video: Video; ref?: Ref<PlayerH
 
   return (
     <div className="player">
-      {playing ? (
+      {playing && playerDemo.on ? (
+        // ukázka na webu: místo YouTube náhled, posuvník a čas
+        <div className="poster demo-playing">
+          <Thumb video={video} size="lg" eager />
+          <span className="demo-scrub">
+            <i style={{ width: `${Math.min(100, (start / Math.max(1, secs(video.d))) * 100)}%` }} />
+          </span>
+          <span className="poster-dur">
+            {fmtTime(start)} / {video.d}
+          </span>
+        </div>
+      ) : playing ? (
         <iframe
           ref={frame}
           src={`https://www.youtube-nocookie.com/embed/${video.v}?autoplay=1&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&start=${start}&origin=${encodeURIComponent(window.location.origin)}`}

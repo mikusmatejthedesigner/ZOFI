@@ -12,4 +12,13 @@ export default defineConfig({
   resolve: {
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
   },
+  build: {
+    // web a ukázka aplikace (demo.html), kterou web vkládá do okna
+    rolldownOptions: {
+      input: {
+        main: fileURLToPath(new URL('./index.html', import.meta.url)),
+        demo: fileURLToPath(new URL('./demo.html', import.meta.url)),
+      },
+    },
+  },
 })

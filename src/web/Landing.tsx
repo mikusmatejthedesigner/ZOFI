@@ -9,7 +9,8 @@ import { useCzechTypography } from '../lib/czech'
 import { Hero } from './Hero'
 import { FacadeTour } from './FacadeTour'
 import { Anchoring } from './Anchoring'
-import { Stats, Statement, Courses, VideoWall, Bento } from './Showcase'
+import { AppTour } from './AppTour'
+import { Stats, Statement, Courses, VideoWall } from './Showcase'
 import { Audience, Compare, Pricing, Faq, FinalCta } from './Sell'
 import './web.css'
 
@@ -51,12 +52,12 @@ export default function Landing() {
       <main>
         <Hero />
         <Stats />
-        <FacadeTour />
+        <AppTour />
         <Statement />
+        <FacadeTour />
         <Courses />
         <Anchoring />
         <VideoWall />
-        <Bento />
         <Audience />
         <Compare />
         <Pricing />
@@ -93,14 +94,14 @@ function Nav() {
           <span>Akademie</span>
         </a>
         <nav className="nav-links" aria-label="Hlavní">
-          <a href="#kurzy" onClick={goTo('#kurzy')}>
-            Kurzy
+          <a href="#aplikace" onClick={goTo('#aplikace')}>
+            Aplikace
           </a>
           <a href="#vrstvy" onClick={goTo('#vrstvy')}>
             Jak na fasádu
           </a>
-          <a href="#aplikace" onClick={goTo('#aplikace')}>
-            Aplikace
+          <a href="#kurzy" onClick={goTo('#kurzy')}>
+            Kurzy
           </a>
           <a href="#cenik" onClick={goTo('#cenik')}>
             Ceník

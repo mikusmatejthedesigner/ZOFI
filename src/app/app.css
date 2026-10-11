@@ -33,13 +33,14 @@
   line-height: 1.45;
   letter-spacing: -0.006em;
 }
+/* tmavý režim podle systému; třídy theme-light / theme-dark na <html> ho vynutí (ukázka na webu) */
 @media (prefers-color-scheme: dark) {
-  html.in-app,
-  html.in-app body {
+  html.in-app:not(.theme-light),
+  html.in-app:not(.theme-light) body {
     background: #0c0c0d;
     color-scheme: dark;
   }
-  .app {
+  html:not(.theme-light) .app {
     --bg: #0c0c0d;
     --panel: #111113;
     --raised: #18181b;
@@ -58,6 +59,30 @@
     --thumb: #1f1f23;
     --shadow-pop: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 16px 40px -8px rgba(0, 0, 0, 0.6);
   }
+}
+html.theme-dark.in-app,
+html.theme-dark.in-app body {
+  background: #0c0c0d;
+  color-scheme: dark;
+}
+html.theme-dark .app {
+  --bg: #0c0c0d;
+  --panel: #111113;
+  --raised: #18181b;
+  --hover: rgba(255, 255, 255, 0.05);
+  --active: rgba(255, 255, 255, 0.085);
+  --fill: rgba(255, 255, 255, 0.07);
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.14);
+  --tx: #f4f4f5;
+  --tx-2: #b4b4bb;
+  --tx-3: #7b7b85;
+  --accent: #ff3b66;
+  --accent-tx: #ff6a88;
+  --accent-soft: rgba(255, 59, 102, 0.14);
+  --ok: #22c55e;
+  --thumb: #1f1f23;
+  --shadow-pop: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 16px 40px -8px rgba(0, 0, 0, 0.6);
 }
 .app :focus-visible {
   outline: 2px solid var(--accent);

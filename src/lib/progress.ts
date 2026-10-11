@@ -4,6 +4,8 @@ import { useSyncExternalStore } from 'react'
 export type Progress = { watched: string[]; last?: string; liked: string[]; saved: string[] }
 
 const KEY = 'zofi.progress.v2'
+/** Ukázka aplikace na webu (demo.html) má vlastní průběh jen v paměti a nesahá na skutečný. */
+const DEMO_MODE = (globalThis as { __ZOFI_DEMO__?: boolean }).__ZOFI_DEMO__ === true
 const DEMO: Progress = {
   watched: ['7DFgjeVmT1Y', '9w69d0tfcNU', 'lcx6Xk41iSg', 'etar5LJJeCY', 'Jgf9IC6I0gU'],
   last: 'Er5tVaQ3u2U',
@@ -12,6 +14,7 @@ const DEMO: Progress = {
 }
 
 function load(): Progress {
+  if (DEMO_MODE) return DEMO
   try {
     const raw = localStorage.getItem(KEY)
     if (raw) return { ...DEMO, ...(JSON.parse(raw) as Partial<Progress>) }
@@ -26,6 +29,7 @@ const listeners = new Set<() => void>()
 
 function set(next: Progress) {
   state = next
+  if (DEMO_MODE) return listeners.forEach((l) => l())
   try {
     localStorage.setItem(KEY, JSON.stringify(next))
   } catch {
@@ -55,6 +59,10 @@ export const progress = {
   },
   reset() {
     set({ watched: [], liked: [], saved: [] })
+  },
+  /** Ukázka: vrátí výchozí stav prototypu. */
+  restore() {
+    set(DEMO)
   },
 }
 

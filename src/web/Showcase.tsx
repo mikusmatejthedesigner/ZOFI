@@ -2,10 +2,9 @@ import { useRef } from 'react'
 import { Link } from 'react-router'
 import { gsap } from 'gsap'
 import { useGSAP } from '@gsap/react'
-import { ArrowRight, Check, Play } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import ScrollReveal from '../components/reactbits/ScrollReveal'
 import { NumberTicker } from '@/components/magicui/number-ticker'
-import SpotlightCard from '../components/reactbits/SpotlightCard'
 import { Thumb } from '../components/Thumb'
 import {
   COURSES,
@@ -13,9 +12,7 @@ import {
   courseLessons,
   courseSecs,
   fmtDuration,
-  lessonInfo,
   plural,
-  secs,
   totalSecs,
   vid,
 } from '../data/catalog'
@@ -242,174 +239,6 @@ export function VideoWall() {
         <p className="lead">
           Lepení, kotvení, armování, sokl, hromosvody i míchárna omítek. Nová videa přibývají průběžně a jsou v ceně.
         </p>
-      </div>
-    </section>
-  )
-}
-
-/* ---------- co aplikace umí ---------- */
-export function Bento() {
-  const ref = useRef<HTMLElement>(null)
-  const lesson = vid('Er5tVaQ3u2U')!
-  const info = lessonInfo(lesson.v)
-  const series = courseLessons(COURSES[0]).slice(0, 5)
-
-  useGSAP(
-    () => {
-      const mm = gsap.matchMedia()
-      mm.add('(prefers-reduced-motion: no-preference)', () => {
-        gsap.from('.ring-big .fg', {
-          strokeDashoffset: 2 * Math.PI * 62,
-          duration: 1.8,
-          ease: 'power3.out',
-          scrollTrigger: { trigger: '.ring-big', start: 'top 85%', once: true },
-        })
-        gsap.from('.mini-track b', {
-          scaleY: 0,
-          duration: 0.6,
-          stagger: 0.12,
-          ease: 'back.out(3)',
-          scrollTrigger: { trigger: '.mini-track', start: 'top 85%', once: true },
-        })
-      })
-      return () => mm.revert()
-    },
-    { scope: ref },
-  )
-
-  const circ = 2 * Math.PI * 62
-  return (
-    <section ref={ref} id="aplikace" className="sec mist">
-      <div className="wrap">
-        <header className="sec-head center" data-reveal>
-          <span className="eyebrow">Aplikace</span>
-          <h2 className="h2">Všechno pro fasádu. Nic navíc.</h2>
-          <p className="lead">
-            Čistá aplikace v počítači, tabletu i telefonu. Otevřete ji a pokračujete přesně tam, kde jste skončili.
-          </p>
-        </header>
-        <div className="bento">
-          <SpotlightCard className="tile tile-4" theme="light" spotlightColor="#e62152" data-reveal>
-            <h3>
-              Kurzy jako seriál. <span>Kapitoly a lekce v pořadí, v jakém se staví. Vždy víte, co je na řadě.</span>
-            </h3>
-            <div className="tile-vis">
-              <ol className="mini-list">
-                {series.map((id, i) => {
-                  const x = vid(id)!
-                  const state = i < 3 ? 'done' : i === 3 ? 'now' : ''
-                  return (
-                    <li key={id} className={state}>
-                      <span className={`mini-check ${state}`}>
-                        {state === 'done' && <Check strokeWidth={3} />}
-                        {state === 'now' && <Play fill="currentColor" strokeWidth={0} />}
-                      </span>
-                      {x.t}
-                      <em>{x.d}</em>
-                    </li>
-                  )
-                })}
-              </ol>
-            </div>
-          </SpotlightCard>
-
-          <SpotlightCard className="tile tile-2" theme="light" spotlightColor="#e62152" data-reveal>
-            <h3>
-              Kapitoly ve videu. <span>Klepnete a jste přesně tam, kde se ukazuje to podstatné.</span>
-            </h3>
-            <div className="tile-vis">
-              <div className="mini-player">
-                <div className="thumb">
-                  <Thumb video={lesson} />
-                  <div className="mini-track">
-                    <i />
-                    {info.m.map(([s]) => (
-                      <b key={s} style={{ left: `${(s / secs(lesson.d)) * 100}%` }} />
-                    ))}
-                  </div>
-                </div>
-                <ol className="mini-marks">
-                  {info.m.slice(0, 3).map(([s, name], i) => (
-                    <li key={s} className={i === 1 ? 'on' : ''}>
-                      <span>
-                        {Math.floor(s / 60)}:{String(s % 60).padStart(2, '0')}
-                      </span>
-                      {name}
-                    </li>
-                  ))}
-                </ol>
-              </div>
-            </div>
-          </SpotlightCard>
-
-          <SpotlightCard className="tile tile-2 tile-ring" theme="light" spotlightColor="#e62152" data-reveal>
-            <h3>
-              Pamatuje si, <span>kde jste skončili.</span>
-            </h3>
-            <div className="tile-vis">
-              <div className="ring-big">
-                <svg viewBox="0 0 150 150">
-                  <circle className="bg" cx="75" cy="75" r="62" />
-                  <circle className="fg" cx="75" cy="75" r="62" strokeDasharray={circ} strokeDashoffset={circ * 0.6} />
-                </svg>
-                <div>
-                  <strong>40 %</strong>
-                  <small>4 z 10 lekcí</small>
-                </div>
-              </div>
-            </div>
-          </SpotlightCard>
-
-          <SpotlightCard className="tile tile-2" theme="light" spotlightColor="#e62152" data-reveal>
-            <h3>
-              Hlavní body <span>ke každé lekci. Na stavbě je najdete za pár vteřin.</span>
-            </h3>
-            <div className="tile-vis">
-              <ol className="mini-points">
-                {info.k.map((k, i) => (
-                  <li key={k}>
-                    <b>{i + 1}</b>
-                    {k}
-                  </li>
-                ))}
-              </ol>
-            </div>
-          </SpotlightCard>
-
-          <SpotlightCard className="tile tile-2 tile-zero" theme="light" spotlightColor="#e62152" data-reveal>
-            <h3>
-              Bez reklam. <span>Žádná doporučená videa, která vás odvedou jinam.</span>
-            </h3>
-            <div className="tile-vis">
-              <div className="big-zero">0</div>
-              <p>reklam a rozptylování</p>
-            </div>
-          </SpotlightCard>
-
-          <SpotlightCard className="tile tile-6 tile-devices" theme="light" spotlightColor="#e62152" data-reveal>
-            <div>
-              <h3>V počítači, tabletu i telefonu.</h3>
-              <p>Na stavbě v mobilu, večer v klidu na velké obrazovce. Průběh máte všude stejný.</p>
-            </div>
-            <div className="devices" aria-hidden>
-              <div className="dev-laptop">
-                <div className="thumb">
-                  <Thumb video={vid('bCudN8yMi64')!} />
-                </div>
-              </div>
-              <div className="dev-phone">
-                <div className="dev-phone-in">
-                  <div className="thumb">
-                    <Thumb video={lesson} size="sm" />
-                  </div>
-                  <b>{lesson.t}</b>
-                  <i />
-                  <i />
-                </div>
-              </div>
-            </div>
-          </SpotlightCard>
-        </div>
       </div>
     </section>
   )

@@ -1,10 +1,12 @@
-import { useLayoutEffect, useMemo, useRef, type RefObject } from 'react'
+import { useLayoutEffect, useMemo, useRef, useState, type RefObject } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { ContactShadows, Environment, Lightformer, PresentationControls } from '@react-three/drei'
 import * as THREE from 'three'
 import { buildWasher } from './geometry'
+import { buildAnchor } from './anchor'
 
 export type WasherMode = 'hero' | 'inspect'
+export type Product = 'talir' | 'kotva'
 
 type Props = {
   mode: WasherMode
@@ -16,11 +18,13 @@ type Props = {
   active: boolean
   /** otáčení tažením (jen myš) */
   drag?: boolean
+  /** produkt v detailu: talíř nebo spirálová kotva */
+  product?: Product
   onReady?: () => void
 }
 
 /** 3D talíř ZOFITHERM: lesklý červený plast ve studiovém světle. Načítá se líně. */
-export default function WasherScene({ mode, progress, pointer, active, drag = false, onReady }: Props) {
+export default function WasherScene({ mode, progress, pointer, active, drag = false, product = 'talir', onReady }: Props) {
   return (
     <Canvas
       shadows
@@ -46,8 +50,8 @@ export default function WasherScene({ mode, progress, pointer, active, drag = fa
             polar={[-Math.PI / 2.2, Math.PI / 2.2]}
             azimuth={[-Infinity, Infinity]}
           >
-            <InspectRig progress={progress}>
-              <Washer />
+            <InspectRig progress={progress} product={product}>
+              <Swap product={product} />
             </InspectRig>
           </PresentationControls>
           <ContactShadows position={[0, -1.25, 0]} opacity={0.32} scale={5} blur={2.6} far={2.4} resolution={512} />
@@ -176,12 +180,28 @@ function HeroRig({
 }
 
 /** Detail: talíř se při scrollu pomalu otáčí z lícové strany na rubovou. */
-function InspectRig({ children, progress }: { children: React.ReactNode; progress?: RefObject<number> }) {
+function InspectRig({
+  children,
+  progress,
+  product,
+}: {
+  children: React.ReactNode
+  progress?: RefObject<number>
+  product: Product
+}) {
   const g = useRef<THREE.Group>(null)
   useFrame((state, dt) => {
     const el = g.current
     if (!el) return
     const p = progress?.current ?? 0
+    if (product === 'kotva') {
+      // kotva leží šikmo a točí se kolem své osy, celek se jen lehce naklání
+      el.rotation.x = THREE.MathUtils.damp(el.rotation.x, -0.25 + p * 0.3, 3, dt)
+      el.rotation.y = THREE.MathUtils.damp(el.rotation.y, -0.35 + p * 0.7, 3, dt)
+      el.rotation.z = THREE.MathUtils.damp(el.rotation.z, 0, 3, dt)
+      el.position.y = Math.sin(state.clock.elapsedTime * 0.8) * 0.04
+      return
+    }
     // vždy natočený lícem k divákovi, aby nebyl vidět jen z hrany
     el.rotation.x = THREE.MathUtils.damp(el.rotation.x, -0.85 + p * 0.45, 3, dt)
     el.rotation.y = THREE.MathUtils.damp(el.rotation.y, -0.55 + p * 1.1, 3, dt)
@@ -189,4 +209,78 @@ function InspectRig({ children, progress }: { children: React.ReactNode; progres
     el.position.y = Math.sin(state.clock.elapsedTime * 0.8) * 0.04
   })
   return <group ref={g}>{children}</group>
+}
+
+/** Výměna produktu: starý se zmenší a otočí pryč, nový naroste. */
+function Swap({ product }: { product: Product }) {
+  const [shown, setShown] = useState<Product>(product)
+  const g = useRef<THREE.Group>(null)
+  useFrame((_, dt) => {
+    const el = g.current
+    if (!el) return
+    const out = product !== shown
+    const s = THREE.MathUtils.damp(el.scale.x, out ? 0 : 1, out ? 9 : 5, dt)
+    el.scale.setScalar(Math.max(0.0001, s))
+    el.rotation.y += dt * (out ? 6 : 0) + (1 - s) * dt * 4
+    if (out && s < 0.04) {
+      el.rotation.y = -1.2
+      setShown(product)
+    }
+    if (!out) el.rotation.y = THREE.MathUtils.damp(el.rotation.y, 0, 4, dt)
+  })
+  return <group ref={g}>{shown === 'talir' ? <Washer /> : <Anchor />}</group>
+}
+
+/** Spirálová kotva: světlý plast, černá EPDM podložka, nerezová matice a závitová tyč. */
+function Anchor() {
+  const g = useMemo(() => buildAnchor(), [])
+  const spin = useRef<THREE.Group>(null)
+  const m = useMemo(() => {
+    const plastic = new THREE.MeshPhysicalMaterial({
+      color: '#e4e7ec',
+      roughness: 0.42,
+      clearcoat: 0.35,
+      clearcoatRoughness: 0.35,
+      envMapIntensity: 1.1,
+    })
+    const blade = plastic.clone()
+    blade.color = new THREE.Color('#f3f4f6')
+    blade.side = THREE.DoubleSide
+    const grey = plastic.clone()
+    grey.color = new THREE.Color('#c9ced6')
+    const rubber = new THREE.MeshPhysicalMaterial({
+      color: '#1d2027',
+      roughness: 0.5,
+      clearcoat: 0.3,
+      clearcoatRoughness: 0.5,
+      envMapIntensity: 1.2,
+    })
+    const steel = new THREE.MeshStandardMaterial({ color: '#e2e6ec', metalness: 0.85, roughness: 0.3, envMapIntensity: 2.2 })
+    // šestihranné díly s ostrými hranami
+    const hex = steel.clone()
+    hex.flatShading = true
+    const greyHex = grey.clone()
+    greyHex.flatShading = true
+    return { plastic, blade, grey, greyHex, rubber, steel, hex }
+  }, [])
+  // kotva se pomalu „zašroubovává“ kolem své osy
+  useFrame((_, dt) => {
+    if (spin.current) spin.current.rotation.y += dt * 0.7
+  })
+  return (
+    // šikmo jako na renderu: hrot vlevo nahoře
+    <group rotation={[0.25, 0.2, 0.72]} scale={0.68}>
+      <group ref={spin}>
+        <mesh geometry={g.core} material={m.plastic} castShadow receiveShadow />
+        <mesh geometry={g.blade} material={m.blade} castShadow receiveShadow />
+        <mesh geometry={g.collar} material={m.greyHex} castShadow receiveShadow />
+        <mesh geometry={g.flange} material={m.grey} castShadow receiveShadow />
+        <mesh geometry={g.rubber} material={m.rubber} castShadow receiveShadow />
+        <mesh geometry={g.washer} material={m.steel} castShadow />
+        <mesh geometry={g.nut} material={m.hex} castShadow receiveShadow />
+        <mesh geometry={g.rod} material={m.steel} castShadow />
+        <mesh geometry={g.thread} material={m.steel} castShadow />
+      </group>
+    </group>
+  )
 }

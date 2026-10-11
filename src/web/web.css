@@ -596,339 +596,6 @@
   }
 }
 
-/* ---------- bento ---------- */
-.bento {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 20px;
-}
-.tile {
-  display: flex;
-  flex-direction: column;
-  min-height: 360px;
-  padding: 32px !important;
-  border-radius: 28px !important;
-}
-.tile-4 {
-  grid-column: span 4;
-}
-.tile-2 {
-  grid-column: span 2;
-}
-.tile-6 {
-  grid-column: span 6;
-}
-.tile h3 {
-  font-size: 24px;
-  font-weight: 700;
-  line-height: 1.15;
-  letter-spacing: -0.03em;
-}
-.tile h3 span {
-  color: var(--ink-3);
-}
-.tile-vis {
-  position: relative;
-  display: flex;
-  flex: 1;
-  align-items: flex-end;
-  margin-top: 28px;
-}
-@media (max-width: 1000px) {
-  .tile-4,
-  .tile-2,
-  .tile-6 {
-    grid-column: span 6;
-  }
-  .tile {
-    min-height: 0;
-  }
-}
-
-/* seriál */
-.mini-list {
-  width: 100%;
-  border-radius: 18px;
-  background: var(--bg-2);
-  padding: 8px 18px;
-}
-.mini-list li {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 11px 0;
-  font-size: 15px;
-}
-.mini-list li + li {
-  border-top: 1px solid var(--line-soft);
-}
-.mini-list li em {
-  margin-left: auto;
-  color: var(--ink-3);
-  font-size: 13px;
-  font-style: normal;
-  font-variant-numeric: tabular-nums;
-}
-.mini-check {
-  display: grid;
-  place-items: center;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  flex: none;
-  box-shadow: inset 0 0 0 1.5px var(--line);
-}
-.mini-check svg {
-  width: 13px;
-  height: 13px;
-}
-.mini-check.done {
-  background: var(--green);
-  color: #fff;
-  box-shadow: none;
-}
-.mini-check.now {
-  background: var(--red);
-  color: #fff;
-  box-shadow: 0 0 0 4px var(--red-soft);
-}
-.mini-list li.now {
-  font-weight: 600;
-}
-
-/* kapitoly */
-.mini-player {
-  width: 100%;
-}
-.mini-player .thumb {
-  border-radius: 14px;
-}
-.mini-player .thumb::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(transparent 50%, rgba(0, 0, 0, 0.55));
-}
-.mini-track {
-  position: absolute;
-  z-index: 1;
-  left: 14px;
-  right: 14px;
-  bottom: 14px;
-  height: 4px;
-  border-radius: 2px;
-  background: rgba(255, 255, 255, 0.35);
-}
-.mini-track i {
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 30%;
-  border-radius: 2px;
-  background: #fff;
-}
-.mini-track b {
-  position: absolute;
-  top: -3px;
-  width: 2px;
-  height: 10px;
-  border-radius: 1px;
-  background: var(--red);
-}
-.mini-marks {
-  margin-top: 14px;
-}
-.mini-marks li {
-  display: flex;
-  gap: 12px;
-  padding: 4px 0;
-  color: var(--ink-2);
-  font-size: 14px;
-}
-.mini-marks li span {
-  width: 36px;
-  color: var(--ink-3);
-  font-variant-numeric: tabular-nums;
-}
-.mini-marks li.on {
-  color: var(--ink);
-  font-weight: 600;
-}
-.mini-marks li.on span {
-  color: var(--red);
-}
-
-/* průběh */
-.ring-big {
-  position: relative;
-  width: 150px;
-  height: 150px;
-  margin: 0 auto;
-}
-.ring-big svg {
-  width: 100%;
-  height: 100%;
-  transform: rotate(-90deg);
-}
-.ring-big circle {
-  fill: none;
-  stroke-width: 12;
-  stroke-linecap: round;
-}
-.ring-big .bg {
-  stroke: var(--line-soft);
-}
-.ring-big .fg {
-  stroke: var(--red);
-}
-.ring-big div {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-content: center;
-  text-align: center;
-}
-.ring-big strong {
-  font-family: var(--font-display);
-  font-size: 36px;
-  font-weight: 700;
-  letter-spacing: -0.04em;
-  line-height: 1;
-}
-.ring-big small {
-  margin-top: 4px;
-  color: var(--ink-3);
-  font-size: 13px;
-}
-.tile-ring .tile-vis {
-  align-items: center;
-  justify-content: center;
-}
-
-/* hlavní body */
-.mini-points {
-  width: 100%;
-}
-.mini-points li {
-  display: flex;
-  gap: 12px;
-  padding: 12px 0;
-  border-top: 1px solid var(--line-soft);
-  font-size: 15px;
-  line-height: 1.4;
-}
-.mini-points li b {
-  color: var(--red);
-  font-variant-numeric: tabular-nums;
-}
-
-/* bez reklam */
-.big-zero {
-  font-family: var(--font-display);
-  font-size: 140px;
-  font-weight: 700;
-  line-height: 0.8;
-  letter-spacing: -0.06em;
-  color: transparent;
-  background: linear-gradient(180deg, var(--red), #ff8a5b);
-  -webkit-background-clip: text;
-  background-clip: text;
-}
-.big-zero + p {
-  margin: 12px 0 0 6px;
-  color: var(--ink-2);
-  font-size: 15px;
-}
-.tile-zero .tile-vis {
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-end;
-}
-
-/* zařízení */
-.tile-devices {
-  display: grid;
-  grid-template-columns: 1fr 1.3fr;
-  align-items: center;
-  gap: 32px;
-  min-height: 0;
-}
-.tile-devices p {
-  margin-top: 14px;
-  color: var(--ink-2);
-  font-size: 17px;
-  max-width: 380px;
-}
-.devices {
-  position: relative;
-  height: 320px;
-}
-.dev-laptop {
-  position: absolute;
-  left: 30px;
-  right: 92px;
-  bottom: 22px;
-  padding: 10px;
-  border-radius: 14px 14px 4px 4px;
-  background: #1d1d1b;
-}
-.dev-laptop::after {
-  content: '';
-  position: absolute;
-  left: -6%;
-  right: -6%;
-  bottom: -14px;
-  height: 14px;
-  border-radius: 0 0 14px 14px;
-  background: linear-gradient(#d2d2d7, #b9b9bf);
-}
-.dev-laptop .thumb {
-  border-radius: 6px;
-}
-.dev-phone {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  width: 128px;
-  padding: 7px;
-  border-radius: 24px;
-  background: #1d1d1b;
-  box-shadow: var(--shadow-2);
-}
-.dev-phone-in {
-  aspect-ratio: 9 / 19;
-  border-radius: 18px;
-  overflow: hidden;
-  background: #fff;
-}
-.dev-phone-in .thumb {
-  border-radius: 0;
-}
-.dev-phone-in b {
-  display: block;
-  padding: 8px 8px 2px;
-  font-size: 10px;
-  line-height: 1.2;
-  color: #1d1d1b;
-}
-.dev-phone-in i {
-  display: block;
-  height: 5px;
-  margin: 6px 8px 0;
-  border-radius: 3px;
-  background: #e8e8ed;
-}
-.dev-phone-in i:nth-of-type(2) {
-  width: 60%;
-}
-@media (max-width: 734px) {
-  .tile-devices {
-    grid-template-columns: 1fr;
-  }
-  .devices {
-    height: 210px;
-  }
-}
-
 /* ---------- pro koho ---------- */
 .aud-grid {
   display: grid;
@@ -1562,6 +1229,24 @@
 }
 .hero-copy .hero-cta {
   margin-top: 30px;
+}
+.hero-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 18px;
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.hero-live svg {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.3s var(--ease-out);
+}
+.hero-live:hover svg {
+  transform: translateY(3px);
 }
 .hero .hero-stage {
   margin-top: clamp(48px, 6vw, 84px);
@@ -2354,18 +2039,26 @@
 }
 .anc-shot {
   position: relative;
+  display: block;
   aspect-ratio: 16 / 10;
   border-radius: 24px;
   overflow: hidden;
   background: #d9d9de;
 }
 .anc-shot img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
   will-change: transform;
 }
-.anc-shot figcaption {
+/* poslední řada: obě karty stejně vysoké */
+.anc-grid > .anc-shot:nth-child(n + 4) {
+  aspect-ratio: auto;
+  min-height: clamp(260px, 25vw, 360px);
+}
+.anc-cap {
   position: absolute;
   left: 14px;
   right: 14px;
@@ -2379,11 +2072,62 @@
   font-size: 13.5px;
   line-height: 1.35;
   text-align: left;
+  transition: background 0.3s;
 }
-.anc-shot figcaption b {
+.anc-shot:hover .anc-cap {
+  background: rgba(20, 20, 22, 0.66);
+}
+.anc-cap b {
   display: block;
   color: #fff;
   font-size: 15px;
+}
+.anc-cap small {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  color: #ff8aa3;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.anc-cap small svg {
+  width: 11px;
+  height: 11px;
+  flex: none;
+}
+/* přepínač produktu ve 3D */
+.anc-switch {
+  position: absolute;
+  z-index: 2;
+  top: 18px;
+  left: 50%;
+  display: flex;
+  padding: 3px;
+  border-radius: 980px;
+  background: rgba(255, 255, 255, 0.72);
+  -webkit-backdrop-filter: blur(16px) saturate(1.6);
+  backdrop-filter: blur(16px) saturate(1.6);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.06),
+    0 8px 24px -12px rgba(0, 0, 0, 0.25);
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+.anc-switch button {
+  padding: 7px 14px;
+  border-radius: 980px;
+  color: var(--ink-2);
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  transition:
+    background 0.25s,
+    color 0.25s;
+}
+.anc-switch button.on {
+  background: var(--ink);
+  color: #fff;
 }
 .anc-cta {
   display: flex;
@@ -2397,7 +2141,321 @@
   .anc-3d {
     grid-row: auto;
   }
+  .anc-grid > .anc-shot:nth-child(n + 4) {
+    aspect-ratio: 16 / 10;
+    min-height: 0;
+  }
   .anc-stage {
     min-height: 380px;
   }
+}
+
+/* ====================================================================
+   Aplikace naživo: skutečná aplikace v okně, ovládaná kurzorem
+   ==================================================================== */
+.atour {
+  position: relative;
+  background: linear-gradient(180deg, #ffffff 0%, #f3f3f5 18%, #f3f3f5 82%, #ffffff 100%);
+}
+.atour-pin {
+  --step: 0;
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+}
+.atour .wrap {
+  max-width: 1480px;
+}
+.atour-grid {
+  display: grid;
+  grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(32px, 4vw, 64px);
+  width: 100%;
+}
+.atour-copy .h2 {
+  font-size: clamp(36px, 4.2vw, 58px);
+}
+.atour-note {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+  color: var(--ink-2);
+  font-size: 15px;
+  line-height: 1.45;
+  letter-spacing: -0.01em;
+}
+.live-dot {
+  width: 8px;
+  height: 8px;
+  margin-top: 7px;
+  border-radius: 50%;
+  background: var(--red);
+  flex: none;
+  animation: live-pulse 1.6s ease-out infinite;
+}
+@keyframes live-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(230, 33, 82, 0.55);
+  }
+  100% {
+    box-shadow: 0 0 0 10px rgba(230, 33, 82, 0);
+  }
+}
+.atour-steps {
+  margin-top: 26px;
+}
+.atour-steps li {
+  position: relative;
+  border-top: 1px solid var(--line-soft);
+}
+.atour-steps button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 13px 0;
+  color: var(--ink-3);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  text-align: left;
+  transition: color 0.3s;
+}
+.atour-steps button:hover,
+.atour-steps li.on button {
+  color: var(--ink);
+}
+.atour-steps button svg {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  transition: color 0.3s;
+}
+.atour-steps li.on button svg {
+  color: var(--red);
+}
+.atour-steps li.done button {
+  color: var(--ink-2);
+}
+.atour-more {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.55s var(--ease-out);
+}
+.atour-more > div {
+  overflow: hidden;
+}
+.atour-steps li.on .atour-more {
+  grid-template-rows: 1fr;
+}
+.atour-more p {
+  padding: 0 0 14px 32px;
+  color: var(--ink-2);
+  font-size: 15px;
+  line-height: 1.45;
+}
+.atour-fill {
+  position: absolute;
+  left: 0;
+  top: -1px;
+  width: 0;
+  height: 2px;
+  background: var(--red);
+}
+.atour-steps li.on .atour-fill {
+  width: calc(var(--step) * 100%);
+}
+
+.atour-stage {
+  position: relative;
+  perspective: 1800px;
+}
+.atour-laptop {
+  transform-origin: 50% 100%;
+  transition:
+    scale 0.9s var(--ease-out),
+    translate 0.9s var(--ease-out),
+    filter 0.9s;
+}
+.atour-laptop .device-url {
+  transform: none;
+}
+.atour-screen {
+  position: relative;
+  overflow: hidden;
+  background: #fff;
+}
+.atour-screen iframe {
+  position: absolute;
+  left: 0;
+  top: 0;
+  max-width: none;
+  border: 0;
+  background: #fff;
+  transform-origin: 0 0;
+  pointer-events: none;
+}
+.atour-phone {
+  position: absolute;
+  z-index: 3;
+  right: -28px;
+  bottom: -44px;
+  width: clamp(200px, 19vw, 270px);
+  opacity: 0;
+  translate: 80px 0;
+  rotate: 4deg;
+  transition:
+    opacity 0.6s,
+    translate 0.9s var(--ease-out),
+    rotate 0.9s var(--ease-out);
+  pointer-events: none;
+}
+.phone-on .atour-phone {
+  opacity: 1;
+  translate: 0 0;
+  rotate: 0deg;
+}
+.phone-on .atour-laptop {
+  scale: 0.94;
+  translate: -5% 0;
+  filter: saturate(0.85) brightness(0.97);
+}
+.phone-frame {
+  position: relative;
+  padding: 9px;
+  border-radius: 46px;
+  background: #1d1d1f;
+  box-shadow:
+    inset 0 0 0 2px #3a3a3c,
+    0 0 0 1px rgba(0, 0, 0, 0.2),
+    0 50px 90px -30px rgba(0, 0, 0, 0.55);
+}
+.phone-frame .atour-screen {
+  border-radius: 0 0 36px 36px;
+}
+.phone-status {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 34px;
+  padding: 0 22px 0 26px;
+  border-radius: 36px 36px 0 0;
+  background: #fff;
+  color: #000;
+  font-size: 12px;
+  letter-spacing: 0;
+}
+.phone-status b {
+  font-weight: 650;
+}
+.phone-island {
+  position: absolute;
+  left: 50%;
+  top: 8px;
+  width: 30%;
+  height: 20px;
+  border-radius: 12px;
+  background: #000;
+  transform: translateX(-50%);
+}
+.phone-icons {
+  display: flex;
+  gap: 3px;
+}
+.phone-icons i {
+  width: 14px;
+  height: 8px;
+  border-radius: 2px;
+  background: #000;
+}
+.phone-icons i:nth-child(1) {
+  width: 12px;
+  clip-path: polygon(0 100%, 100% 0, 100% 100%);
+}
+.phone-icons i:nth-child(2) {
+  width: 11px;
+  border-radius: 50% 50% 2px 2px;
+}
+.phone-icons i:nth-child(3) {
+  width: 20px;
+  box-shadow: inset 0 0 0 1.5px #000;
+  background: linear-gradient(90deg, #000 70%, transparent 70%);
+}
+.atour-caption {
+  display: none;
+}
+@media (max-width: 899px) {
+  .atour-pin {
+    align-items: flex-start;
+    padding-top: 70px;
+  }
+  .atour-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+  .atour-copy {
+    text-align: center;
+  }
+  .atour-copy .h2 {
+    font-size: 30px;
+  }
+  .atour-note {
+    display: block;
+    margin-top: 6px;
+    font-size: 13px;
+  }
+  .live-dot {
+    display: inline-block;
+    margin: 0 6px 1px 0;
+    vertical-align: middle;
+  }
+  .atour-steps {
+    display: none;
+  }
+  .atour-stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .atour-phone {
+    position: relative;
+    right: auto;
+    bottom: auto;
+    width: min(64vw, calc((100svh - 330px) * 0.45));
+    opacity: 1;
+    translate: 0 0;
+    rotate: 0deg;
+  }
+  .atour-caption {
+    display: block;
+    max-width: 340px;
+    margin-top: 16px;
+    text-align: center;
+  }
+  .atour-caption b {
+    font-size: 18px;
+    letter-spacing: -0.02em;
+  }
+  .atour-caption p {
+    margin-top: 4px;
+    color: var(--ink-2);
+    font-size: 14px;
+    line-height: 1.4;
+  }
+}
+/* bez animací: jedna obrazovka a všechny kroky rozbalené */
+.atour-still .atour-pin {
+  height: auto;
+  padding: 96px 0;
+}
+.atour-still .atour-more {
+  grid-template-rows: 1fr;
+}
+.atour-still .atour-phone {
+  display: none;
 }

@@ -2,6 +2,9 @@ import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { VIDEOS, courseLessons, courseOf, feedMeta, fmtAgo, type Course, type Video } from '../data/catalog'
 import { useProgress } from '../lib/progress'
 
+/** Ukázka aplikace na webu (demo.html): přehrávač nenačítá YouTube. */
+export const playerDemo = { on: false }
+
 /* ---------- název stránky ---------- */
 export function useTitle(title: string) {
   useEffect(() => {

@@ -3,7 +3,7 @@ import { Link } from 'react-router'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useGSAP } from '@gsap/react'
-import { Bookmark, Check, GraduationCap, Heart, Lock, Play, PlaySquare, Search } from 'lucide-react'
+import { ArrowDown, Bookmark, Check, GraduationCap, Heart, Lock, Play, PlaySquare, Search } from 'lucide-react'
 import { BorderBeam } from '@/components/magicui/border-beam'
 import { ShimmerButton } from '@/components/magicui/shimmer-button'
 import SplitText from '../components/reactbits/SplitText'
@@ -159,7 +159,8 @@ export function Hero() {
           />
         </h1>
         <p className="hero-sub">
-          Videokurzy zateplení natočené na skutečných stavbách ZOFI. V aplikaci, která ví, kde jste skončili.
+          Aplikace s videokurzy zateplení natočenými na skutečných stavbách ZOFI. Najde každý detail a ví, kde jste
+          skončili.
         </p>
         <div className="hero-cta">
           <ShimmerButton
@@ -187,6 +188,10 @@ export function Hero() {
             <Check aria-hidden strokeWidth={2.5} /> Zrušíte kdykoliv
           </span>
         </div>
+        <a className="hero-live" href="#aplikace" onClick={goTo('#aplikace')}>
+          <span className="live-dot" aria-hidden /> Prohlédněte si aplikaci naživo
+          <ArrowDown aria-hidden />
+        </a>
       </div>
 
       <div className="hero-stage">
