@@ -77,9 +77,7 @@ export const COURSES: Course[] = [
         "t": "Sokl",
         "l": [
           "etar5LJJeCY",
-          "ss8zz5Yg6WY",
-          "JQsUyljbayE",
-          "IX-1IWWdTcQ"
+          "JQsUyljbayE"
         ]
       },
       {
@@ -93,12 +91,6 @@ export const COURSES: Course[] = [
         "l": [
           "dv5w8z7GOQA",
           "Rk-BBlIEPWE"
-        ]
-      },
-      {
-        "t": "Povrchy",
-        "l": [
-          "ZX89aaMajH4"
         ]
       }
     ],
@@ -124,8 +116,7 @@ export const COURSES: Course[] = [
         "t": "Hromosvod",
         "l": [
           "WpDBIUGskFg",
-          "aEtE0ip0ZkM",
-          "cXmpSogRKKY"
+          "aEtE0ip0ZkM"
         ]
       },
       {
@@ -137,10 +128,7 @@ export const COURSES: Course[] = [
       {
         "t": "Kotvení izolantu",
         "l": [
-          "eQTPR0zh5_E",
-          "ojADyZqeGOE",
-          "PPLYiow1M0Q",
-          "KPtJJG9cmvo"
+          "ojADyZqeGOE"
         ]
       }
     ],

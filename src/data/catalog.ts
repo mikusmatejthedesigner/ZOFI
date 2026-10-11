@@ -1,6 +1,7 @@
 import { VIDEOS, type Video } from './videos'
 import { COURSES, type Course } from './courses'
 import { LESSONS, type LessonInfo } from './lessons'
+import { FEED, type FeedMeta } from './feed'
 
 export { VIDEOS, COURSES }
 export type { Video, Course, LessonInfo }
@@ -14,6 +15,36 @@ export const courseOf = (id: string) => COURSES.find((c) => courseLessons(c).inc
 export const chapterOf = (c: Course, id: string) => c.chapters.findIndex((ch) => ch.l.includes(id))
 export const standalone = () => VIDEOS.filter((x) => !courseOf(x.v))
 export const newest = () => VIDEOS.filter((x) => x.isNew)
+
+/* ---------- sekce Videa ---------- */
+const feedById = new Map(FEED.map((f) => [f.v, f]))
+export const feedMeta = (id: string): FeedMeta | undefined => feedById.get(id)
+/** Samostatná videa od nejnovějšího, s daty příspěvku. */
+export const feed = () => FEED.map((f) => ({ ...f, video: vid(f.v)! })).filter((f) => f.video)
+export type FeedItem = ReturnType<typeof feed>[number]
+
+/** Adresa videa v aplikaci: lekce v kurzu, nebo samostatné video. */
+export const videoHref = (id: string) => {
+  const c = courseOf(id)
+  return c ? `/app/kurzy/${c.id}/${id}` : `/app/videa/${id}`
+}
+
+/** "2026-10-08" → "8. října 2026" */
+export const fmtDate = (iso: string) =>
+  new Date(iso + 'T12:00:00').toLocaleDateString('cs-CZ', { day: 'numeric', month: 'long', year: 'numeric' })
+
+/** Relativně k dnešku: „před 3 dny“, „před 2 týdny“… */
+export const fmtAgo = (iso: string, now = new Date()) => {
+  const days = Math.round((now.getTime() - new Date(iso + 'T12:00:00').getTime()) / 86400000)
+  if (days <= 0) return 'dnes'
+  if (days === 1) return 'včera'
+  if (days < 7) return `před ${days} ${plural(days, 'dnem', 'dny', 'dny')}`
+  const w = Math.round(days / 7)
+  if (days < 31) return `před ${w} ${plural(w, 'týdnem', 'týdny', 'týdny')}`
+  const m = Math.round(days / 30)
+  if (days < 365) return `před ${m} ${plural(m, 'měsícem', 'měsíci', 'měsíci')}`
+  return fmtDate(iso)
+}
 
 /** "m:ss" → sekundy */
 export const secs = (d: string) => d.split(':').reduce((a, b) => a * 60 + Number(b), 0)

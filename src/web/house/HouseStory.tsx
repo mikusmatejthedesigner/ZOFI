@@ -6,7 +6,7 @@ import { useGSAP } from '@gsap/react'
 import { ArrowRight, Check, ChevronDown, Play } from 'lucide-react'
 import SplitText from '../../components/reactbits/SplitText'
 import { ShimmerButton } from '@/components/magicui/shimmer-button'
-import { PLANS, newest } from '../../data/catalog'
+import { PLANS, newest, videoHref } from '../../data/catalog'
 import { cz } from '../../lib/czech'
 import { goTo, scrollToTarget } from '../../lib/smooth-scroll'
 import { LAYERS } from './steps'
@@ -101,7 +101,7 @@ export function HouseStory() {
 
         <div className="story-intro wrap">
           {fresh && (
-            <Link className="hero-pill" to={`/app/lekce/${fresh.v}`}>
+            <Link className="hero-pill" to={videoHref(fresh.v)}>
               <b>Nové</b>
               <span>{fresh.t}</span>
               <ArrowRight aria-hidden />
@@ -148,7 +148,7 @@ export function HouseStory() {
             >
               Předplatit od {PLANS.rok.monthly} Kč měsíčně
             </ShimmerButton>
-            <Link className="btn btn-lg btn-ghost btn-blur" to={`/app/lekce/${INTRO}`}>
+            <Link className="btn btn-lg btn-ghost btn-blur" to={videoHref(INTRO)}>
               <Play aria-hidden fill="currentColor" />
               Pustit úvod zdarma
             </Link>

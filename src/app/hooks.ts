@@ -23,7 +23,7 @@ export const ToastCtx = createContext<(msg: string) => void>(() => {})
 export const useToast = () => useContext(ToastCtx)
 
 /* ---------- hledání ve videích ---------- */
-const norm = (s: string) =>
+export const norm = (s: string) =>
   s
     .normalize('NFD')
     .replace(/\p{Diacritic}/gu, '')
@@ -40,3 +40,10 @@ export function useVideoSearch(q: string) {
   }, [q])
 }
 
+
+/** Odpovídá text dotazu? (všechna slova, bez ohledu na diakritiku) */
+export const matchText = (q: string, hay: string) => {
+  const words = norm(q).split(/\s+/).filter(Boolean)
+  const h = norm(hay)
+  return words.every((w) => h.includes(w))
+}

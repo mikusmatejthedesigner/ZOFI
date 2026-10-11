@@ -1,18 +1,20 @@
 import { useSyncExternalStore } from 'react'
 
-/* Průběh lekcí. V prototypu se ukládá jen do prohlížeče. */
-export type Progress = { watched: string[]; last?: string }
+/* Průběh lekcí, „Líbí se“ a uložená videa. V prototypu se ukládá jen do prohlížeče. */
+export type Progress = { watched: string[]; last?: string; liked: string[]; saved: string[] }
 
-const KEY = 'zofi.progress.v1'
+const KEY = 'zofi.progress.v2'
 const DEMO: Progress = {
-  watched: ['7DFgjeVmT1Y', '9w69d0tfcNU', 'lcx6Xk41iSg', 'etar5LJJeCY', 'ss8zz5Yg6WY'],
+  watched: ['7DFgjeVmT1Y', '9w69d0tfcNU', 'lcx6Xk41iSg', 'etar5LJJeCY', 'Jgf9IC6I0gU'],
   last: 'Er5tVaQ3u2U',
+  liked: [],
+  saved: ['2SlGQlGqOak'],
 }
 
 function load(): Progress {
   try {
     const raw = localStorage.getItem(KEY)
-    if (raw) return JSON.parse(raw) as Progress
+    if (raw) return { ...DEMO, ...(JSON.parse(raw) as Partial<Progress>) }
   } catch {
     /* úložiště není dostupné */
   }
@@ -32,12 +34,12 @@ function set(next: Progress) {
   listeners.forEach((l) => l())
 }
 
+const toggleIn = (list: string[], id: string) => (list.includes(id) ? list.filter((x) => x !== id) : [...list, id])
+
 export const progress = {
   get: () => state,
-  isWatched: (id: string) => state.watched.includes(id),
   toggle(id: string) {
-    const has = state.watched.includes(id)
-    set({ ...state, watched: has ? state.watched.filter((x) => x !== id) : [...state.watched, id] })
+    set({ ...state, watched: toggleIn(state.watched, id) })
   },
   markWatched(id: string) {
     if (!state.watched.includes(id)) set({ ...state, watched: [...state.watched, id] })
@@ -45,8 +47,14 @@ export const progress = {
   setLast(id: string) {
     if (state.last !== id) set({ ...state, last: id })
   },
+  like(id: string) {
+    set({ ...state, liked: toggleIn(state.liked, id) })
+  },
+  save(id: string) {
+    set({ ...state, saved: toggleIn(state.saved, id) })
+  },
   reset() {
-    set({ watched: [] })
+    set({ watched: [], liked: [], saved: [] })
   },
 }
 

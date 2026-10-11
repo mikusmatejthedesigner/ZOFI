@@ -26,6 +26,10 @@ Neměnit schválený styl bez souhlasu. Nepublikovat nic za ZOFI bez rozhodnutí
 Vlastní placená platforma na videokurzy ZOFI, náhrada za Herohero, Patreon a členství na YouTube (bez jejich poplatků a s plnou kontrolou). Videa s hodnotou, která nechceme dávat na YouTube zdarma, jsou rozdělená do kurzů za paywallem.
 
 - **Dvě části:** prodejní web na `/` (musí zákazníkovi aplikaci prodat, animovaný, moderní) a aplikace na `/app` (přehledná a jednoduchá jako od Apple). „Přihlásit se“ vede z webu rovnou do aplikace.
+- **Aplikace má dvě hlavní sekce** (horní přepínač Videa | Kurzy, na mobilu spodní lišta, účet pod avatarem):
+  - **Videa** (`/app/videa`, `pages/Videos.tsx`, `Watch.tsx`): samostatná videa mimo kurzy, jako YouTube/Herohero/Patreon. Nahoře nejnovější video, filtry podle témat, Uložené, hledání, mřížka. Stránka videa: přehrávač, Líbí se, Uložit, Sdílet, popis, komentáře, další videa. Data v `src/data/feed.ts` (datum, téma, počty, ukázkové komentáře jsou zástupné).
+  - **Kurzy** (`/app/kurzy`, `Courses.tsx`, `CourseDetail.tsx`, `Lesson.tsx`): ucelené série. Pokračovat v rozkoukaném kurzu, karty kurzů, osnova, lekce na `/app/kurzy/<kurz>/<video>` s kapitolami ve videu, hlavními body a seznamem lekcí.
+  - Video patří buď do kurzu, nebo do Videí. Správnou adresu vrací `videoHref(id)`. Starý odkaz `/app/lekce/<id>` přesměruje.
 - **Vzhled:** Apple styl. Barvy a typografie v `src/styles/base.css` (vychází z `prototyp/shared/base.css`), písmo systémové, jinde Inter. Aplikace má světlý i tmavý režim podle systému, web ne.
 - **Stav:** prototyp. Přihlášení, platby a předplatné jen vypadají jako skutečné. Průběh lekcí se ukládá do prohlížeče (`src/lib/progress.ts`). Videa jsou z YouTube (`youtube-nocookie.com`). Pro skutečný paywall budou potřeba neveřejná videa jinde (např. Bunny Stream, Mux, Cloudflare Stream).
 - **Obsah:** `src/data/` (videa, kurzy, okamžiky a hlavní body lekcí) převzatý z prototypu. Rozdělení do kurzů, ceny a okamžiky ve videích jsou zástupné. Texty vrstev fasády a hlavních bodů ověřit s technikem.

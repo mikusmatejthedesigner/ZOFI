@@ -1,80 +1,83 @@
-import { useEffect, useState } from 'react'
-import { useLocation } from 'react-router'
-import { Search } from 'lucide-react'
-import { COURSES, VIDEOS, courseLessons, plural, standalone, totalSecs, fmtDuration } from '../../data/catalog'
-import { CourseCard, VideoCard } from '../ui'
-import { useTitle, useVideoSearch } from '../hooks'
+import { Link } from 'react-router'
+import { ListVideo, Play } from 'lucide-react'
+import { Thumb } from '../../components/Thumb'
+import { COURSES, chapterOf, courseLessons, courseOf, vid, type Course } from '../../data/catalog'
+import { useProgress } from '../../lib/progress'
+import { Bar, CourseCard } from '../ui'
+import { useCourseProgress, useTitle } from '../hooks'
 
+/** Sekce Kurzy: ucelené série lekcí. */
 export function Courses() {
   useTitle('Kurzy')
-  const [q, setQ] = useState('')
-  const results = useVideoSearch(q)
-  const { hash } = useLocation()
-  const lessons = COURSES.reduce((a, c) => a + courseLessons(c).length, 0)
+  const { last, watched } = useProgress()
 
-  // Odkaz „Zobrazit vše“ u samostatných videí.
-  useEffect(() => {
-    if (hash) document.querySelector(hash)?.scrollIntoView()
-  }, [hash])
+  // rozkoukaný kurz: poslední otevřená lekce, jinak první začatý a nedokončený kurz
+  const started = (c: Course) => {
+    const ids = courseLessons(c)
+    const done = ids.filter((id) => watched.includes(id)).length
+    return done > 0 && done < ids.length
+  }
+  const lastCourse = last ? courseOf(last) : undefined
+  const current = lastCourse && started(lastCourse) ? lastCourse : COURSES.find(started)
 
   return (
     <div className="page">
       <header className="page-head">
         <h1 className="large-title">Kurzy</h1>
-        <p className="page-sub">
-          {COURSES.length} kurzy, {lessons} lekcí a {VIDEOS.length} videí. Celkem {fmtDuration(totalSecs())}.
-        </p>
-        <label className="field-search">
-          <Search aria-hidden />
-          <input
-            type="search"
-            placeholder="Hledat ve všech videích"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-          />
-        </label>
+        <p className="page-sub">Ucelené série lekcí v pořadí, v jakém se na stavbě opravdu pracuje.</p>
       </header>
 
-      {q ? (
-        <section className="block">
+      {current && <Continue c={current} lastId={last} />}
+
+      <section className="block">
+        {current && (
           <div className="block-head">
-            <h2>
-              {results.length
-                ? `${results.length} ${plural(results.length, 'výsledek', 'výsledky', 'výsledků')}`
-                : 'Nic jsme nenašli'}
-            </h2>
+            <h2>Všechny kurzy</h2>
           </div>
-          {results.length ? (
-            <div className="grid-4">
-              {results.map((x) => (
-                <VideoCard key={x.v} x={x} />
-              ))}
-            </div>
-          ) : (
-            <p className="empty">Zkuste jiné slovo, třeba „sokl“, „hmoždinka“ nebo „omítka“.</p>
-          )}
-        </section>
-      ) : (
-        <>
-          <section className="block">
-            <div className="grid-3">
-              {COURSES.map((c) => (
-                <CourseCard key={c.id} c={c} />
-              ))}
-            </div>
-          </section>
-          <section className="block" id="videa">
-            <div className="block-head">
-              <h2>Samostatná videa</h2>
-            </div>
-            <div className="grid-4">
-              {standalone().map((x) => (
-                <VideoCard key={x.v} x={x} />
-              ))}
-            </div>
-          </section>
-        </>
-      )}
+        )}
+        <div className="course-list">
+          {COURSES.map((c) => (
+            <CourseCard key={c.id} c={c} />
+          ))}
+        </div>
+      </section>
     </div>
+  )
+}
+
+/** Velká karta „Pokračovat“ s rozkoukanou lekcí. */
+function Continue({ c, lastId }: { c: Course; lastId?: string }) {
+  const p = useCourseProgress(c)
+  const ids = courseLessons(c)
+  const id = lastId && ids.includes(lastId) ? lastId : p.next
+  const pos = ids.indexOf(id) + 1
+  const chapter = c.chapters[chapterOf(c, id)]
+  return (
+    <section className="continue">
+      <Thumb video={vid(id)!} size="lg" eager className="continue-bg" />
+      <div className="continue-in">
+        <span className="continue-kicker">
+          Pokračovat v kurzu · Lekce {pos} z {ids.length}
+        </span>
+        <h2>{c.title}</h2>
+        {chapter && <p>Kapitola {chapterOf(c, id) + 1}: {chapter.t}</p>}
+        <div className="continue-progress">
+          <Bar pct={p.pct} />
+          <span>
+            {p.done} z {p.total} lekcí
+          </span>
+        </div>
+        <div className="continue-cta">
+          <Link className="btn btn-light" to={`/app/kurzy/${c.id}/${id}`}>
+            <Play aria-hidden fill="currentColor" />
+            Pokračovat
+          </Link>
+          <Link className="btn btn-glass" to={`/app/kurzy/${c.id}`}>
+            <ListVideo aria-hidden />
+            Osnova kurzu
+          </Link>
+        </div>
+      </div>
+    </section>
   )
 }

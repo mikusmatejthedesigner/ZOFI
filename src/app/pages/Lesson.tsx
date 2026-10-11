@@ -1,117 +1,71 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router'
 import { ArrowRight, Check, ChevronLeft, Play } from 'lucide-react'
-import { Thumb } from '../../components/Thumb'
-import {
-  chapterOf,
-  courseLessons,
-  courseOf,
-  fmtTime,
-  lessonInfo,
-  standalone,
-  vid,
-  type Video,
-} from '../../data/catalog'
+import { chapterOf, course, courseLessons, fmtTime, lessonInfo, videoHref, vid, type Course } from '../../data/catalog'
 import { progress, useProgress } from '../../lib/progress'
-import { Bar, VideoCard } from '../ui'
+import { Bar, Player, type PlayerHandle } from '../ui'
 import { useCourseProgress, useTitle } from '../hooks'
 
+/** Lekce kurzu: přehrávač, kapitoly ve videu, hlavní body a seznam lekcí. */
 export function Lesson() {
-  const { videoId = '' } = useParams()
-  if (!vid(videoId)) return <Navigate to="/app" replace />
+  const { courseId = '', lessonId = '' } = useParams()
+  const c = course(courseId)
+  if (!vid(lessonId)) return <Navigate to={c ? `/app/kurzy/${c.id}` : '/app/kurzy'} replace />
+  if (!c || !courseLessons(c).includes(lessonId)) return <Navigate to={videoHref(lessonId)} replace />
   // key: přechod na jinou lekci začne s čistým přehrávačem
-  return <LessonView key={videoId} id={videoId} />
+  return <LessonView key={lessonId} c={c} id={lessonId} />
 }
 
-function LessonView({ id }: { id: string }) {
+function LessonView({ c, id }: { c: Course; id: string }) {
   const x = vid(id)!
   useTitle(x.t)
   const nav = useNavigate()
   const { watched } = useProgress()
-  const c = courseOf(id)
-  const list = c ? courseLessons(c) : standalone().map((v) => v.v)
+  const player = useRef<PlayerHandle>(null)
+  const list = courseLessons(c)
   const idx = list.indexOf(id)
-  const next = idx >= 0 && idx < list.length - 1 ? list[idx + 1] : undefined
+  const next = idx < list.length - 1 ? list[idx + 1] : undefined
   const info = lessonInfo(id)
   const done = watched.includes(id)
-  const chapter = c ? c.chapters[chapterOf(c, id)] : undefined
-
-  const [playing, setPlaying] = useState(false)
-  const [start, setStart] = useState(0)
-  const frame = useRef<HTMLIFrameElement>(null)
+  const ci = chapterOf(c, id)
 
   useEffect(() => {
     progress.setLast(id)
   }, [id])
 
-  // Skok na okamžik ve videu: běžící přehrávač posuneme, jinak ho spustíme od dané vteřiny.
-  const seek = (t: number) => {
-    const w = frame.current?.contentWindow
-    if (playing && w) {
-      w.postMessage(JSON.stringify({ event: 'command', func: 'seekTo', args: [t, true] }), '*')
-      w.postMessage(JSON.stringify({ event: 'command', func: 'playVideo', args: [] }), '*')
-    } else {
-      setStart(t)
-      setPlaying(true)
-    }
-    frame.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
-  }
-
   const goNext = () => {
     progress.markWatched(id)
-    if (next) nav(`/app/lekce/${next}`)
+    nav(next ? `/app/kurzy/${c.id}/${next}` : `/app/kurzy/${c.id}`)
   }
 
   return (
     <div className="page lesson">
       <div className="lesson-main">
-        {c ? (
-          <Link className="back" to={`/app/kurzy/${c.id}`}>
-            <ChevronLeft aria-hidden /> {c.short}
-          </Link>
-        ) : (
-          <Link className="back" to="/app/kurzy">
-            <ChevronLeft aria-hidden /> Kurzy
-          </Link>
-        )}
+        <Link className="back" to={`/app/kurzy/${c.id}`}>
+          <ChevronLeft aria-hidden /> {c.short}
+        </Link>
 
-        <div className="player">
-          {playing ? (
-            <iframe
-              ref={frame}
-              src={`https://www.youtube-nocookie.com/embed/${x.v}?autoplay=1&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&start=${start}&origin=${encodeURIComponent(window.location.origin)}`}
-              title={x.t}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-            />
-          ) : (
-            <button className="poster" onClick={() => setPlaying(true)} aria-label={`Přehrát: ${x.t}`}>
-              <Thumb video={x} size="lg" eager />
-              <span className="poster-play">
-                <Play fill="currentColor" aria-hidden />
-              </span>
-              <span className="poster-dur">{x.d}</span>
-            </button>
-          )}
-        </div>
+        <Player video={x} ref={player} />
 
         <div className="lesson-head">
           <div>
             <span className="page-kicker">
-              {c && chapter ? `Kapitola ${chapterOf(c, id) + 1} · ${chapter.t} · Lekce ${idx + 1} z ${list.length}` : 'Samostatné video'}
+              Lekce {idx + 1} z {list.length} · Kapitola {ci + 1}: {c.chapters[ci].t}
             </span>
             <h1>{x.t}</h1>
           </div>
           <div className="lesson-actions">
-            <button className={`btn btn-ghost${done ? ' is-done' : ''}`} onClick={() => progress.toggle(id)} aria-pressed={done}>
+            <button
+              className={`btn btn-ghost${done ? ' is-done' : ''}`}
+              onClick={() => progress.toggle(id)}
+              aria-pressed={done}
+            >
               <Check aria-hidden strokeWidth={2.5} />
-              {done ? 'Zhlédnuto' : 'Označit jako zhlédnuté'}
+              {done ? 'Hotovo' : 'Označit jako hotové'}
             </button>
-            {next && (
-              <button className="btn" onClick={goNext}>
-                Další lekce <ArrowRight aria-hidden />
-              </button>
-            )}
+            <button className="btn" onClick={goNext}>
+              {next ? 'Další lekce' : 'Dokončit kurz'} <ArrowRight aria-hidden />
+            </button>
           </div>
         </div>
 
@@ -123,7 +77,7 @@ function LessonView({ id }: { id: string }) {
             <ol className="moments">
               {info.m.map(([t, name]) => (
                 <li key={t}>
-                  <button onClick={() => seek(t)}>
+                  <button onClick={() => player.current?.seek(t)}>
                     <span>{fmtTime(t)}</span>
                     {name}
                   </button>
@@ -146,14 +100,13 @@ function LessonView({ id }: { id: string }) {
       </div>
 
       <aside className="lesson-side">
-        {c ? <Playlist courseId={c.id} current={id} /> : <MoreVideos current={id} />}
+        <Playlist c={c} current={id} />
       </aside>
     </div>
   )
 }
 
-function Playlist({ courseId, current }: { courseId: string; current: string }) {
-  const c = courseOf(current)!
+function Playlist({ c, current }: { c: Course; current: string }) {
   const p = useCourseProgress(c)
   const { watched } = useProgress()
   const all = courseLessons(c)
@@ -166,7 +119,7 @@ function Playlist({ courseId, current }: { courseId: string; current: string }) 
   return (
     <div className="playlist" ref={ref}>
       <div className="playlist-head">
-        <Link to={`/app/kurzy/${courseId}`}>{c.title}</Link>
+        <Link to={`/app/kurzy/${c.id}`}>{c.title}</Link>
         <div className="playlist-progress">
           <Bar pct={p.pct} />
           <span>
@@ -181,16 +134,20 @@ function Playlist({ courseId, current }: { courseId: string; current: string }) 
           </h3>
           <ol>
             {ch.l.map((l) => {
-              const v: Video = vid(l)!
-              const done = watched.includes(l)
+              const v = vid(l)!
+              const isDone = watched.includes(l)
               return (
                 <li key={l}>
-                  <Link to={`/app/lekce/${l}`} className={l === current ? 'on' : ''} aria-current={l === current ? 'page' : undefined}>
-                    <span className={`pl-state${done ? ' done' : ''}`}>
+                  <Link
+                    to={`/app/kurzy/${c.id}/${l}`}
+                    className={l === current ? 'on' : ''}
+                    aria-current={l === current ? 'page' : undefined}
+                  >
+                    <span className={`pl-state${isDone ? ' done' : ''}`}>
                       {l === current ? (
                         <Play fill="currentColor" strokeWidth={0} aria-hidden />
-                      ) : done ? (
-                        <Check strokeWidth={3} aria-label="Zhlédnuto" />
+                      ) : isDone ? (
+                        <Check strokeWidth={3} aria-label="Hotovo" />
                       ) : (
                         all.indexOf(l) + 1
                       )}
@@ -204,21 +161,6 @@ function Playlist({ courseId, current }: { courseId: string; current: string }) 
           </ol>
         </div>
       ))}
-    </div>
-  )
-}
-
-function MoreVideos({ current }: { current: string }) {
-  return (
-    <div className="more-videos">
-      <h2>Další samostatná videa</h2>
-      <div className="stack-list">
-        {standalone()
-          .filter((v) => v.v !== current)
-          .map((v) => (
-            <VideoCard key={v.v} x={v} />
-          ))}
-      </div>
     </div>
   )
 }

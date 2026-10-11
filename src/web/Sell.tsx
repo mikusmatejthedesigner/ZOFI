@@ -6,7 +6,7 @@ import { ShimmerButton } from '@/components/magicui/shimmer-button'
 import { Check, Factory, HardHat, Hammer, House, Minus, Paintbrush } from 'lucide-react'
 import SpotlightCard from '../components/reactbits/SpotlightCard'
 import Magnet from '../components/reactbits/Magnet'
-import { COURSES, PLANS, VIDEOS, courseLessons, kc, yearlySaving } from '../data/catalog'
+import { COURSES, PLANS, VIDEOS, courseLessons, kc, videoHref, yearlySaving } from '../data/catalog'
 import { goTo } from '../lib/smooth-scroll'
 
 const INTRO = '7DFgjeVmT1Y'
@@ -162,7 +162,7 @@ export function Pricing() {
                 <Check aria-hidden /> Bez platební karty
               </li>
             </ul>
-            <Link className="btn btn-ghost" to={`/app/lekce/${INTRO}`}>
+            <Link className="btn btn-ghost" to={videoHref(INTRO)}>
               Pustit úvod
             </Link>
           </div>
@@ -200,7 +200,7 @@ export function Pricing() {
               background="#e62152"
               shimmerColor="#ffd2dd"
               shimmerDuration="2.6s"
-              onClick={() => nav('/app?vitejte=1')}
+              onClick={() => nav('/app/videa?vitejte=1')}
             >
               Předplatit {period === 'rok' ? 'na rok' : 'na měsíc'}
             </ShimmerButton>
@@ -290,7 +290,7 @@ export function FinalCta() {
               Předplatit
             </a>
           </Magnet>
-          <Link className="btn btn-lg btn-glass" to={`/app/lekce/${INTRO}`}>
+          <Link className="btn btn-lg btn-glass" to={videoHref(INTRO)}>
             Pustit úvod zdarma
           </Link>
         </div>

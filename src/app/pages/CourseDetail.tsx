@@ -8,9 +8,8 @@ import { useCourseProgress, useTitle } from '../hooks'
 
 export function CourseDetail() {
   const { courseId = '' } = useParams()
-  const c = course(courseId)
-  if (!c) return <Navigate to="/app/kurzy" replace />
-  return <CourseView id={c.id} />
+  if (!course(courseId)) return <Navigate to="/app/kurzy" replace />
+  return <CourseView id={courseId} />
 }
 
 function CourseView({ id }: { id: string }) {
@@ -44,26 +43,11 @@ function CourseView({ id }: { id: string }) {
             <Bar pct={p.pct} />
             <span>{p.done ? `${p.done} z ${p.total} lekcí hotovo` : 'Zatím nezačato'}</span>
           </div>
-          <Link className="btn" to={`/app/lekce/${p.next}`}>
+          <Link className="btn" to={`/app/kurzy/${c.id}/${p.next}`}>
             <Play aria-hidden fill="currentColor" />
             {p.done === 0 ? 'Začít kurz' : p.done === p.total ? 'Pustit znovu' : 'Pokračovat'}
           </Link>
         </div>
-      </section>
-
-      <section className="block learn">
-        <div>
-          <h2>Co se naučíte</h2>
-          <p className="for-who">{c.forWho}</p>
-        </div>
-        <ul>
-          {c.out.map((o) => (
-            <li key={o}>
-              <Check aria-hidden strokeWidth={2.5} />
-              {o}
-            </li>
-          ))}
-        </ul>
       </section>
 
       <section className="block">
@@ -88,7 +72,7 @@ function CourseView({ id }: { id: string }) {
                   const isNext = l === p.next && !done
                   return (
                     <li key={l}>
-                      <Link className={`lrow${isNext ? ' next' : ''}`} to={`/app/lekce/${l}`}>
+                      <Link className={`lrow${isNext ? ' next' : ''}`} to={`/app/kurzy/${c.id}/${l}`}>
                         <span className={`lrow-state${done ? ' done' : ''}`}>
                           {done ? <Check strokeWidth={3} aria-label="Zhlédnuto" /> : all.indexOf(l) + 1}
                         </span>
@@ -109,6 +93,21 @@ function CourseView({ id }: { id: string }) {
             </div>
           )
         })}
+      </section>
+
+      <section className="block learn">
+        <div>
+          <h2>Co se naučíte</h2>
+          <p className="for-who">{c.forWho}</p>
+        </div>
+        <ul>
+          {c.out.map((o) => (
+            <li key={o}>
+              <Check aria-hidden strokeWidth={2.5} />
+              {o}
+            </li>
+          ))}
+        </ul>
       </section>
     </div>
   )
