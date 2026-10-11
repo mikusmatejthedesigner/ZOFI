@@ -6,8 +6,9 @@ import { useGSAP } from '@gsap/react'
 import { Logo } from '../components/Logo'
 import { initSmoothScroll, goTo } from '../lib/smooth-scroll'
 import { useCzechTypography } from '../lib/czech'
-import { HouseStory } from './house/HouseStory'
-import { AppShowcase } from './AppShowcase'
+import { Hero } from './Hero'
+import { FacadeTour } from './FacadeTour'
+import { Anchoring } from './Anchoring'
 import { Stats, Statement, Courses, VideoWall, Bento } from './Showcase'
 import { Audience, Compare, Pricing, Faq, FinalCta } from './Sell'
 import './web.css'
@@ -21,6 +22,8 @@ export default function Landing() {
   useEffect(() => {
     document.title = 'Fasádní akademie ZOFI'
     window.scrollTo(0, 0)
+    // po načtení písma se texty přelijí: přepočítat pozice scrollovaných sekcí
+    document.fonts?.ready.then(() => ScrollTrigger.refresh())
     return initSmoothScroll()
   }, [])
 
@@ -46,11 +49,12 @@ export default function Landing() {
     <div ref={root} className="site">
       <Nav />
       <main>
-        <HouseStory />
-        <AppShowcase />
+        <Hero />
         <Stats />
+        <FacadeTour />
         <Statement />
         <Courses />
+        <Anchoring />
         <VideoWall />
         <Bento />
         <Audience />
