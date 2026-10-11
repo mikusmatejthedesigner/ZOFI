@@ -7,7 +7,7 @@ const AppRoutes = lazy(() => import('./app/AppRoutes'))
 
 export default function Root() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '')}>
       <Suspense fallback={null}>
         <Routes>
           <Route path="/" element={<Landing />} />
