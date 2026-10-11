@@ -22,6 +22,7 @@ export const feedMeta = (id: string): FeedMeta | undefined => feedById.get(id)
 /** Samostatná videa od nejnovějšího, s daty příspěvku. */
 export const feed = () => FEED.map((f) => ({ ...f, video: vid(f.v)! })).filter((f) => f.video)
 export type FeedItem = ReturnType<typeof feed>[number]
+export const FEED_COUNT = FEED.length
 
 /** Adresa videa v aplikaci: lekce v kurzu, nebo samostatné video. */
 export const videoHref = (id: string) => {

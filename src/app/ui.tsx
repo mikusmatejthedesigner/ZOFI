@@ -1,11 +1,13 @@
-import { useCallback, useImperativeHandle, useRef, useState, type ReactNode, type Ref } from 'react'
+import { useCallback, useImperativeHandle, useLayoutEffect, useRef, useState, type ReactNode, type Ref } from 'react'
 import { Link } from 'react-router'
-import { Bookmark, Check, Heart, MessageCircle, Play } from 'lucide-react'
+import gsap from 'gsap'
+import { Bookmark, Check, Heart, ListVideo, Play } from 'lucide-react'
+import { AnimatedCircularProgressBar } from '@/components/magicui/animated-circular-progress-bar'
+import { NumberTicker } from '@/components/magicui/number-ticker'
 import { Thumb } from '../components/Thumb'
 import {
+  courseLessons,
   courseSecs,
-  feedMeta,
-  fmtAgo,
   fmtDuration,
   plural,
   videoHref,
@@ -14,119 +16,250 @@ import {
   type Video,
 } from '../data/catalog'
 import { progress, useProgress } from '../lib/progress'
-import { ToastCtx, useCourseProgress, useToast } from './hooks'
+import { ToastCtx, useCourseProgress, useMounted, useToast, videoMeta } from './hooks'
 
 /* ---------- průběh ---------- */
 export function Bar({ pct }: { pct: number }) {
+  const on = useMounted()
   return (
     <div className="pbar" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
-      <i style={{ width: `${pct}%` }} />
+      <i style={{ width: `${on ? pct : 0}%` }} />
     </div>
   )
 }
 
-/* ---------- karta videu v sekci Videa ---------- */
-export function VideoCard({ x }: { x: Video }) {
-  const { watched, liked } = useProgress()
-  const m = feedMeta(x.v)
+/** Malý kroužek průběhu do postranního panelu. */
+export function MiniRing({ pct }: { pct: number }) {
+  const on = useMounted()
+  const c = 2 * Math.PI * 7
   return (
-    <Link className="vcard" to={videoHref(x.v)}>
+    <svg className={`mini-ring${pct >= 100 ? ' full' : ''}`} viewBox="0 0 18 18" aria-hidden>
+      <circle className="track" cx="9" cy="9" r="7" />
+      <circle className="val" cx="9" cy="9" r="7" strokeDasharray={c} strokeDashoffset={c * (1 - (on ? pct : 0) / 100)} />
+    </svg>
+  )
+}
+
+/** Kruhový ukazatel průběhu kurzu (Magic UI), při načtení se doplní od nuly. */
+export function Gauge({ pct, className = 'size-12 text-[12px]' }: { pct: number; className?: string }) {
+  const on = useMounted()
+  return (
+    <AnimatedCircularProgressBar
+      value={on ? pct : 0}
+      gaugePrimaryColor="var(--accent)"
+      gaugeSecondaryColor="var(--fill)"
+      className={`${className} shrink-0 font-semibold tabular-nums`}
+    />
+  )
+}
+
+/* ---------- karta videa ---------- */
+export function VideoCard({ x, eager = false }: { x: Video; eager?: boolean }) {
+  const { watched, saved, liked } = useProgress()
+  const toast = useToast()
+  const m = videoMeta(x)
+  const seen = watched.includes(x.v)
+  const isSaved = saved.includes(x.v)
+  return (
+    <article className="vcard">
       <div className="thumb">
-        <Thumb video={x} />
+        <Thumb video={x} size="lg" eager={eager} />
         <span className="dur">{x.d}</span>
-        {watched.includes(x.v) && (
-          <span className="seen" aria-label="Zhlédnuto">
-            <Check strokeWidth={3} />
+        {x.isNew && !seen && <span className="badge-new">Nové</span>}
+        {seen && (
+          <span className="thumb-seen" aria-label="Zhlédnuto">
+            <Check strokeWidth={3.5} />
           </span>
         )}
-        {x.isNew && !watched.includes(x.v) && <span className="new">Nové</span>}
       </div>
-      <b>{x.t}</b>
-      {m && (
-        <span className="vcard-meta">
-          <span>{m.topic}</span>
-          <span>{fmtAgo(m.date)}</span>
-          <span className="vcard-stats">
-            <Heart aria-hidden /> {m.likes + (liked.includes(x.v) ? 1 : 0)}
-            <MessageCircle aria-hidden /> {m.comments}
-          </span>
-        </span>
-      )}
-    </Link>
-  )
-}
-
-/** Malá vodorovná karta do seznamu „Další videa“. */
-export function VideoRow({ x, active = false }: { x: Video; active?: boolean }) {
-  const m = feedMeta(x.v)
-  return (
-    <Link className={`vrow${active ? ' on' : ''}`} to={videoHref(x.v)}>
-      <span className="thumb">
-        <Thumb video={x} size="sm" />
-        <span className="dur">{x.d}</span>
-      </span>
-      <span className="vrow-text">
-        <b>{x.t}</b>
-        {m && (
-          <small>
-            {m.topic} · {fmtAgo(m.date)}
-          </small>
-        )}
-      </span>
-    </Link>
-  )
-}
-
-/* ---------- karta kurzu ---------- */
-export function CourseCard({ c }: { c: Course }) {
-  const p = useCourseProgress(c)
-  const cover = vid(c.cover)!
-  return (
-    <article className="course-card">
-      <Link className="course-card-media thumb" to={`/app/kurzy/${c.id}`} tabIndex={-1}>
-        <Thumb video={cover} size="lg" />
-      </Link>
-      <div className="course-card-body">
-        <span className="chip-level">{c.level}</span>
-        <h3>
-          <Link to={`/app/kurzy/${c.id}`}>{c.title}</Link>
-        </h3>
-        <p>{c.desc}</p>
-        <span className="meta">
-          {p.total} {plural(p.total, 'lekce', 'lekce', 'lekcí')} · {fmtDuration(courseSecs(c))}
-        </span>
-        <div className="course-card-foot">
-          <div className="course-card-progress">
-            <Bar pct={p.pct} />
-            <span>{p.done ? `${p.done} z ${p.total} hotovo` : 'Nezačato'}</span>
-          </div>
-          <Link className="btn btn-sm" to={`/app/kurzy/${c.id}/${p.next}`}>
-            <Play aria-hidden fill="currentColor" />
-            {p.done === 0 ? 'Začít' : p.done === p.total ? 'Znovu' : 'Pokračovat'}
+      <button
+        className={`vcard-save${isSaved ? ' on' : ''}`}
+        aria-label={isSaved ? 'Odebrat z uložených' : 'Uložit'}
+        aria-pressed={isSaved}
+        onClick={() => {
+          progress.save(x.v)
+          toast(isSaved ? 'Odebráno z uložených.' : 'Uloženo do knihovny.')
+        }}
+      >
+        <Bookmark fill={isSaved ? 'currentColor' : 'none'} aria-hidden />
+      </button>
+      <div className="vcard-body">
+        <h3 className="vcard-title">
+          <Link className="stretch" to={videoHref(x.v)}>
+            {x.t}
           </Link>
+        </h3>
+        <p className="vcard-desc">{x.desc}</p>
+        <div className="vcard-meta">
+          <b>{m.label}</b>
+          {m.sub && (
+            <>
+              <span className="dot" aria-hidden />
+              <span>{m.sub}</span>
+            </>
+          )}
+          {m.likes !== undefined && (
+            <>
+              <span className="dot" aria-hidden />
+              <span className="likes" aria-label="To se mi líbí">
+                <Heart aria-hidden />
+                {m.likes + (liked.includes(x.v) ? 1 : 0)}
+              </span>
+            </>
+          )}
         </div>
       </div>
     </article>
   )
 }
 
-/* ---------- tlačítka u videa ---------- */
-export function LikeSaveShare({ id, likes }: { id: string; likes?: number }) {
+/** Malý řádek videa (další videa). */
+export function VideoRow({ x }: { x: Video }) {
+  const m = videoMeta(x)
+  return (
+    <Link className="vrow" to={videoHref(x.v)}>
+      <span className="thumb">
+        <Thumb video={x} size="sm" />
+        <span className="dur">{x.d}</span>
+      </span>
+      <span>
+        <b>{x.t}</b>
+        <small>
+          {m.label}
+          {m.sub && ` · ${m.sub}`}
+        </small>
+      </span>
+    </Link>
+  )
+}
+
+/* ---------- kurzy ---------- */
+export function CourseCard({ c }: { c: Course }) {
+  const p = useCourseProgress(c)
+  return (
+    <Link className="ctile" to={`/app/kurzy/${c.id}`}>
+      <div className="thumb">
+        <Thumb video={vid(c.cover)!} size="lg" />
+        <span className="ctile-lessons">
+          <ListVideo aria-hidden />
+          {p.total} {plural(p.total, 'lekce', 'lekce', 'lekcí')}
+        </span>
+      </div>
+      <div className="ctile-body">
+        <span className="ctile-level">{c.level}</span>
+        <h3>{c.title}</h3>
+        <p>{c.desc}</p>
+        <div className="ctile-foot">
+          <Bar pct={p.pct} />
+          <span>{p.done ? `${p.done} z ${p.total}` : 'Nezačato'}</span>
+          <span className="dot" aria-hidden />
+          <span>{fmtDuration(courseSecs(c))}</span>
+        </div>
+      </div>
+    </Link>
+  )
+}
+
+/** Rozkoukaný kurz: kde jste skončili a kolik zbývá. */
+export function ResumeCard({ c, at }: { c: Course; at: string }) {
+  const p = useCourseProgress(c)
+  const x = vid(at)!
+  return (
+    <Link className="resume-card" to={`/app/kurzy/${c.id}/${at}`}>
+      <span className="thumb">
+        <Thumb video={x} size="sm" eager />
+      </span>
+      <span>
+        <small>
+          {c.short} · Lekce {courseLessons(c).indexOf(at) + 1} z {p.total}
+        </small>
+        <b>{x.t}</b>
+        <Bar pct={p.pct} />
+      </span>
+      <span className="play-dot" aria-hidden>
+        <Play fill="currentColor" strokeWidth={0} />
+      </span>
+    </Link>
+  )
+}
+
+/* ---------- záložky s posuvným podtržením (GSAP) ---------- */
+export type TabItem<T extends string> = { id: T; label: string; count?: number }
+
+export function Tabs<T extends string>({
+  items,
+  value,
+  onChange,
+  label,
+  className = '',
+}: {
+  items: TabItem<T>[]
+  value: T
+  onChange: (v: T) => void
+  label: string
+  className?: string
+}) {
+  const box = useRef<HTMLDivElement>(null)
+  const ink = useRef<HTMLSpanElement>(null)
+  const first = useRef(true)
+
+  useLayoutEffect(() => {
+    const btn = box.current?.querySelector<HTMLElement>('[aria-selected="true"]')
+    if (!btn || !ink.current) return
+    const to = { x: btn.offsetLeft + 10, width: btn.offsetWidth - 20 }
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (first.current || reduce) gsap.set(ink.current, to)
+    else gsap.to(ink.current, { ...to, duration: 0.45, ease: 'expo.out', overwrite: true })
+    first.current = false
+    // aktivní záložka viditelná i na úzkém displeji (posouvá jen řádek záložek)
+    const row = box.current!
+    const l = btn.offsetLeft
+    const r = l + btn.offsetWidth
+    if (l < row.scrollLeft) row.scrollLeft = l - 16
+    else if (r > row.scrollLeft + row.clientWidth) row.scrollLeft = r - row.clientWidth + 16
+  }, [value, items.length])
+
+  return (
+    <div className={`tabs ${className}`} role="tablist" aria-label={label} ref={box}>
+      {items.map((t) => (
+        <button
+          key={t.id}
+          role="tab"
+          aria-selected={value === t.id}
+          className={`tab-btn${value === t.id ? ' on' : ''}`}
+          onClick={() => onChange(t.id)}
+        >
+          {t.label}
+          {t.count !== undefined && <em>{t.count}</em>}
+        </button>
+      ))}
+      <span className="tab-ink" ref={ink} aria-hidden />
+    </div>
+  )
+}
+
+/* ---------- Líbí se a Uložit (spojená tlačítka) ---------- */
+export function LikeSave({ id, likes }: { id: string; likes?: number }) {
   const { liked, saved } = useProgress()
   const toast = useToast()
   const isLiked = liked.includes(id)
   const isSaved = saved.includes(id)
   return (
-    <div className="actions">
-      <button className={`pill${isLiked ? ' on' : ''}`} onClick={() => progress.like(id)} aria-pressed={isLiked}>
+    <div className="group">
+      <button className={`b${isLiked ? ' on' : ''}`} onClick={() => progress.like(id)} aria-pressed={isLiked}>
         <Heart aria-hidden fill={isLiked ? 'currentColor' : 'none'} />
-        {likes !== undefined ? likes + (isLiked ? 1 : 0) : 'Líbí se'}
+        {likes !== undefined ? (
+          <NumberTicker value={likes + (isLiked ? 1 : 0)} startValue={Math.max(0, likes - 12)} className="tabular-nums" />
+        ) : (
+          'Líbí se'
+        )}
+        <span className="sr-only">To se mi líbí</span>
       </button>
       <button
-        className={`pill${isSaved ? ' on' : ''}`}
+        className={`b${isSaved ? ' on' : ''}`}
         onClick={() => {
           progress.save(id)
-          toast(isSaved ? 'Odebráno z uložených.' : 'Uloženo. Najdete ho ve Videích pod Uložené.')
+          toast(isSaved ? 'Odebráno z uložených.' : 'Uloženo do knihovny.')
         }}
         aria-pressed={isSaved}
       >
@@ -206,15 +339,30 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   )
 }
 
-export function Avatar({ name, team = false, size = 36 }: { name: string; team?: boolean; size?: number }) {
+export function Avatar({ name, team = false, size = 32 }: { name: string; team?: boolean; size?: number }) {
   const initials = name
     .split(' ')
     .map((p) => p[0])
     .slice(0, 2)
     .join('')
   return (
-    <span className={`avatar${team ? ' team' : ''}`} style={{ width: size, height: size, fontSize: size * 0.38 }}>
+    <span
+      className={`avatar${team ? ' team' : ''}`}
+      style={{ width: size, height: size, fontSize: Math.round(size * 0.38) }}
+      aria-hidden
+    >
       {team ? 'Z' : initials}
     </span>
+  )
+}
+
+/** Prázdný stav seznamu. */
+export function Empty({ icon, title, children }: { icon: ReactNode; title: string; children?: ReactNode }) {
+  return (
+    <div className="empty">
+      {icon}
+      <b>{title}</b>
+      {children && <p>{children}</p>}
+    </div>
   )
 }

@@ -4,6 +4,7 @@ import { ChevronRight, Download } from 'lucide-react'
 import { PLANS, USER, kc } from '../../data/catalog'
 import { progress } from '../../lib/progress'
 import { useTitle, useToast } from '../hooks'
+import { Avatar } from '../ui'
 
 const OFF = 'V prototypu zatím nefunguje.'
 
@@ -22,23 +23,21 @@ export function Account() {
 
   return (
     <div className="page narrow">
-      <header className="page-head">
-        <h1 className="large-title">Účet</h1>
-      </header>
+      <div className="page-title">
+        <h1>Účet</h1>
+      </div>
+      <p className="page-desc">Předplatné, platby a oznámení.</p>
 
       <section className="profile">
-        <span className="avatar xl">
-          {USER.first[0]}
-          {USER.last[0]}
-        </span>
+        <Avatar name={`${USER.first} ${USER.last}`} size={44} />
         <div>
           <h2>
             {USER.first} {USER.last}
           </h2>
           <p>{USER.email}</p>
         </div>
-        <button className="btn btn-ghost btn-sm" onClick={() => toast(OFF)}>
-          Upravit
+        <button className="b b-line" onClick={() => toast(OFF)}>
+          Upravit profil
         </button>
       </section>
 
@@ -90,10 +89,10 @@ export function Account() {
 
 function Group({ title, note, children }: { title?: string; note?: string; children: ReactNode }) {
   return (
-    <section className="group">
-      {title && <h2 className="group-title">{title}</h2>}
-      <div className="group-box">{children}</div>
-      {note && <p className="group-note">{note}</p>}
+    <section className="set">
+      {title && <h2 className="set-title">{title}</h2>}
+      <div className="set-box">{children}</div>
+      {note && <p className="set-note">{note}</p>}
     </section>
   )
 }
@@ -121,7 +120,7 @@ function Row({
       {value && <span className="row-value">{value}</span>}
       {children}
       {icon}
-      {chevron && <ChevronRight className="row-chev" aria-hidden />}
+      {chevron && <ChevronRight aria-hidden />}
     </>
   )
   const cls = `row${danger ? ' danger' : ''}`
