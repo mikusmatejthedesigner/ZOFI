@@ -99,7 +99,7 @@
   letter-spacing: -0.015em;
   transition: background 0.15s;
 }
-.side-item svg:not(.ring) {
+.side-item svg:not(.pring) {
   width: 19px;
   height: 19px;
   color: var(--red);
@@ -119,18 +119,18 @@
   font-weight: 600;
   letter-spacing: 0;
 }
-.ring {
+.pring {
   flex: none;
   transform: rotate(-90deg);
 }
-.ring circle {
+.pring circle {
   fill: none;
   stroke-linecap: round;
 }
-.ring-bg {
+.pring-bg {
   stroke: var(--fill);
 }
-.ring-fg {
+.pring-fg {
   stroke: var(--red);
   transition: stroke-dashoffset 0.6s var(--ease-out);
 }

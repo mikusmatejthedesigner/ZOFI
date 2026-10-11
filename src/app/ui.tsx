@@ -18,13 +18,13 @@ export function Ring({ pct, size = 18, stroke = 3 }: { pct: number; size?: numbe
   const r = (size - stroke) / 2
   const c = 2 * Math.PI * r
   return (
-    <svg className="ring" width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden>
-      <circle cx={size / 2} cy={size / 2} r={r} className="ring-bg" strokeWidth={stroke} />
+    <svg className="pring" width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden>
+      <circle cx={size / 2} cy={size / 2} r={r} className="pring-bg" strokeWidth={stroke} />
       <circle
         cx={size / 2}
         cy={size / 2}
         r={r}
-        className="ring-fg"
+        className="pring-fg"
         strokeWidth={stroke}
         strokeDasharray={c}
         strokeDashoffset={c * (1 - pct / 100)}

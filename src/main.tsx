@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import '@fontsource-variable/inter'
 import './styles/base.css'
+import './styles/magicui.css'
 import Root from './Root'
 
 createRoot(document.getElementById('root')!).render(
